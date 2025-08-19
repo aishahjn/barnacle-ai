@@ -1,16 +1,20 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import logo from '../../assets/logo.png';
 
 const NavBar = () => {
+  const navigate = useNavigate();
+
   return (
     <header
-      className="flex items-center justify-between px-6 py-4"
+      className="flex items-center justify-between px-8 py-4 rounded-4xl my-6"
       style={{
         position: 'absolute',
-        width: '100%',
-        backgroundColor: 'transparent',
-        zIndex: 1000
+        width: '90%',
+        backgroundColor: 'white',
+        zIndex: 1000,
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
       {/* LOGO (image) */}
@@ -19,19 +23,20 @@ const NavBar = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className="hidden md:flex space-x-6">
-        <Link to="/" className="text-gray-700 hover:text-blue-600">Home</Link>
-        <Link to="/statistics" className="text-gray-700 hover:text-blue-600">Statistics</Link>
-        <Link to="/model" className="text-gray-700 hover:text-blue-600">Biofouling Predictor</Link>
-        <Link to="/about" className="text-gray-700 hover:text-blue-600">About</Link>
+      <nav className="hidden md:flex space-x-10">
+        <a onClick={() => navigate('/')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Home</a>
+        <a onClick={() => navigate('/statistics')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Statistics</a>
+        <a onClick={() => navigate('/model')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Biofouling Predictor</a>
+        <a onClick={() => navigate('/about')} className="text-gray-700 hover:text-blue-600 cursor-pointer">About</a>
       </nav>
 
       {/* Login Button */}
-      <Link to="/login">
-        <button className="bg-gradient-to-r from-blue-500 via-indigo-600 to-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow hover:opacity-90">
-          Login
-        </button>
-      </Link>
+      <button
+        onClick={() => navigate('/login')}
+        className="bg-gradient-to-b from-sky-400 to-blue-600 text-white font-semibold px-5 py-3 rounded-full shadow-md hover:opacity-95"
+      >
+        Login
+      </button>
     </header>
   )
 }
