@@ -7,7 +7,7 @@ const NavBar = () => {
 
   return (
     <header
-      className="flex items-center justify-between px-8 py-4 rounded-4xl my-6"
+      className="shadow-xl flex items-center justify-between md:px-6 py-4 rounded-3xl my-6 mt-10"
       style={{
         position: 'absolute',
         width: '90%',
@@ -17,26 +17,30 @@ const NavBar = () => {
         transform: 'translateX(-50%)',
       }}
     >
-      {/* LOGO (image) */}
-      <div className="flex items-center">
-        <img src={logo} alt="BARNACLEAN" className="h-12" />
+      {/* LOGO (flex-1) */}
+      <div className="flex flex-2 items-center">
+        <img 
+          src={logo} 
+          alt="BARNACLEAN" 
+          className="h-10 sm:h-12 md:h-14 object-contain cursor-pointer"
+          onClick={() => navigate('/')}
+        />
       </div>
 
-      {/* Navigation Links */}
-      <nav className="hidden md:flex space-x-10">
+      {/* NAV LINKS + BUTTON (flex-5) */}
+      <div className="hidden md:flex flex-3 items-center justify-end space-x-10 text-lg tracking-wide font-semibold">
         <a onClick={() => navigate('/')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Home</a>
         <a onClick={() => navigate('/statistics')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Statistics</a>
-        <a onClick={() => navigate('/model')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Biofouling Predictor</a>
+        <a onClick={() => navigate('/model')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Model</a>
         <a onClick={() => navigate('/about')} className="text-gray-700 hover:text-blue-600 cursor-pointer">About</a>
-      </nav>
-
-      {/* Login Button */}
-      <button
-        onClick={() => navigate('/login')}
-        className="bg-gradient-to-b from-sky-400 to-blue-600 text-white font-semibold px-5 py-3 rounded-full shadow-md hover:opacity-95"
-      >
-        Login
-      </button>
+        
+        <button
+          onClick={() => navigate('/login')}
+          className="tracking-wide bg-gradient-to-b from-sky-400 to-blue-600 text-white font-semibold px-8 py-2 rounded-full shadow-md hover:opacity-95 text-lg"
+        >
+          Login
+        </button>
+      </div>
     </header>
   )
 }
