@@ -18,7 +18,7 @@ const NavBar = () => {
       }}
     >
       {/* LOGO (flex-1) */}
-      <div className="flex flex-2 items-center">
+      <div className="flex flex-4 items-center">
         <img 
           src={logo} 
           alt="BARNACLEAN" 
@@ -28,7 +28,7 @@ const NavBar = () => {
       </div>
 
       {/* NAV LINKS + BUTTON (flex-5) */}
-      <div className="hidden md:flex flex-3 items-center justify-end space-x-10 text-lg tracking-wide font-semibold">
+      <div className="hidden md:flex flex-5 items-center justify-around space-x-6 text-lg tracking-wide font-semibold">
         <a onClick={() => navigate('/')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Home</a>
         <a onClick={() => navigate('/statistics')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Statistics</a>
         <a onClick={() => navigate('/model')} className="text-gray-700 hover:text-blue-600 cursor-pointer">Model</a>
