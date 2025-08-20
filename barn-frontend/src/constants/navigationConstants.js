@@ -26,3 +26,10 @@ export const LOGIN_BUTTON = {
   label: 'Login',
   path: '/login',
 };
+
+// User profile constants
+export const USER_PROFILE = {
+  name: 'John Doe',
+  role: 'Administrator',
+  logoAlt: 'BARNACLEAN',
+};

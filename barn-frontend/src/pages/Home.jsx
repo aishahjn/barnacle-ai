@@ -4,9 +4,16 @@ import Services from '../components/home/Services';
 
 const Home = () => {
   return (
-    <div>
-      <Hero />
-      <Services />
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      {/* Hero Section */}
+      <section className="relative">
+        <Hero />
+      </section>
+
+      {/* Services Section */}
+      <section className="relative">
+        <Services />
+      </section>
     </div>
   );
 };

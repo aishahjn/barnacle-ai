@@ -1,8 +1,11 @@
 import React from 'react'
+import AboutSections from '../components/about/AboutSections'
 
 const About = () => {
   return (
-    <div>About</div>
+    <div className="w-full">
+      <AboutSections />
+    </div>
   )
 }
 

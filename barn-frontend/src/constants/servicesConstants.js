@@ -20,3 +20,11 @@ export const FEATURES_DATA = [
     description: "Receive instant notifications with actionable insights the moment our system detects operational anomalies or risks."
   }
 ];
+
+// Feature card constants
+export const FEATURE_CARD = {
+  defaultTitle: 'Feature',
+  hoverIconSize: 'w-16 h-16',
+  defaultIconSize: 'w-20 h-20',
+  animationDelay: 'delay-100',
+};
