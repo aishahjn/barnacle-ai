@@ -1,19 +1,52 @@
 import React from 'react';
 import { ABOUT_CONTENT } from '../../constants/aboutConstants';
+import { DESIGN_TOKENS } from '../../constants/designTokens';
+import { Fish, Coral, Seaweed, Starfish } from '../shared/MarineElement';
 
 const AboutHero = () => {
   return (
-    <section className="w-full min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex flex-col justify-center items-center text-white py-20 px-4">
-      <div className="text-center max-w-4xl">
-        <p className="font-semibold text-teal-300 tracking-[0.2em] uppercase text-2xl md:text-3xl">
-          {ABOUT_CONTENT.subtitle}
-        </p>
-        <h1 className="text-4xl md:text-6xl font-bold mt-4 mb-8">
-          {ABOUT_CONTENT.mainHeading}
-        </h1>
-        <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
-          Discover how BarnaClean is revolutionizing industrial operations through innovative technology and sustainable practices.
-        </p>
+    <section className={`w-full min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 text-white flex flex-col justify-center items-center ${DESIGN_TOKENS.spacing.section.padding} ${DESIGN_TOKENS.spacing.section.paddingX} ${DESIGN_TOKENS.spacing.navbar.padding}`}>
+      <div className="relative z-10 max-w-7xl w-full mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="hidden md:flex items-center justify-center p-8">
+            <div className="relative w-full max-w-lg h-96 bg-gradient-to-br from-teal-400/20 to-blue-400/20 rounded-2xl border-2 border-dashed border-teal-300/40 flex items-center justify-center backdrop-blur-sm overflow-hidden">
+              {/* Marine background elements */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-12 left-8">
+                  <Fish size={80} opacity={0.15} animationSpeed={8} />
+                </div>
+                <div className="absolute bottom-16 right-12">
+                  <Coral size={70} opacity={0.2} animationSpeed={6} />
+                </div>
+                <div className="absolute top-1/3 right-8">
+                  <Seaweed height={90} opacity={0.18} animationSpeed={5} />
+                </div>
+                <div className="absolute bottom-8 left-16">
+                  <Starfish size={60} opacity={0.22} animationSpeed={7} />
+                </div>
+              </div>
+              
+              <div className="relative z-10 text-center text-teal-300/60">
+                <svg className="w-20 h-20 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-lg font-medium">Image Placeholder</p>
+                <p className="text-sm opacity-75 mt-2">Add your image here</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center items-start max-w-4xl">
+            <p className="font-semibold text-teal-300 tracking-[0.2em] uppercase text-2xl md:text-3xl">
+              {ABOUT_CONTENT.subtitle}
+            </p>
+            <h1 className="text-4xl md:text-6xl font-bold mt-4 mb-8">
+              {ABOUT_CONTENT.mainHeading}
+            </h1>
+            <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
+              Discover how BarnaClean is revolutionizing industrial operations through innovative technology and sustainable practices.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );

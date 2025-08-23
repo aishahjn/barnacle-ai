@@ -1,61 +1,143 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { FaRocket, FaArrowRight } from 'react-icons/fa';
+import { DESIGN_TOKENS } from '../../constants/designTokens';
+import Loading from '../shared/Loading';
 import backgroundImage from '../../assets/background.jpg';
 
 const Hero = () => {
-  return (
-    <section
-      className="min-h-screen w-full flex items-center justify-end relative overflow-hidden
-                 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
-    >
-      {/* Background Image with Enhanced Overlay */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center sm:bg-center md:bg-left lg:bg-left
-                   transform scale-105 sm:scale-100"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.85)), url(${backgroundImage})`,
-        }}
-      />
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const heroRef = useRef(null);
 
-      {/* Content Container */}
-      <div className="relative z-10 text-end max-w-4xl mr-40 md:mr-20 pr-8 sm:pr-12 md:pr-16 lg:pr-20">
-        <div>
-          {/* Main Title */}
-          <h1 className="font-bold text-black tracking-widest leading-tight
-                         text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl
-                         drop-shadow-sm">
-            Barnaclean
-          </h1>
 
-          {/* Subtitle */}
-          <p className="font-semibold text-black tracking-wider leading-relaxed
-                        text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl
-                        opacity-90">
-            Save Cost, Save Fuel
-          </p>
 
-          {/* CTA Button */}
-          <div className="pt-4 sm:pt-6 md:pt-8">
-            <button className="group relative px-8 sm:px-10 md:px-12 py-3 sm:py-4 md:py-5
-                               bg-gradient-to-r from-blue-600 to-blue-700
-                               text-white font-semibold rounded-2xl
-                               hover:from-blue-700 hover:to-blue-800
-                               transition-all duration-300 ease-in-out
-                               text-sm sm:text-base md:text-lg lg:text-xl
-                               tracking-wider shadow-lg hover:shadow-xl
-                               transform hover:scale-105 active:scale-95">
-              <span className="relative z-10">Start Predicting</span>
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20
-                            rounded-2xl transition-opacity duration-300" />
-            </button>
+  useEffect(() => {
+    // Reduced loading time for better user experience
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+
+    // Set visible immediately and use intersection observer for animations
+    setIsVisible(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    // Delay observer setup until after loading
+    const observerTimer = setTimeout(() => {
+      if (heroRef.current && !isLoading) {
+        observer.observe(heroRef.current);
+      }
+    }, 400);
+
+    return () => {
+      clearTimeout(loadingTimer);
+      clearTimeout(observerTimer);
+      observer.disconnect();
+    };
+  }, [isLoading]);
+
+  if (isLoading) {
+    return (
+      <section className="relative w-full min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-md mx-auto px-4">
+          <Loading 
+            size="large" 
+            text="Loading Marine Solutions..." 
+            variant="default"
+            color="blue"
+          />
+          <div className="space-y-3">
+            <p className="text-white text-lg font-medium">
+              Preparing your ocean conservation dashboard
+            </p>
+            <div className="flex items-center justify-center space-x-2 text-cyan-100 text-sm">
+              <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
+              <span>Initializing marine AI systems...</span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+    );
+  }
 
-      {/* Decorative Elements */}
-      <div className="absolute bottom-8 right-8 w-32 h-32 bg-blue-100 rounded-full
-                      opacity-20 animate-pulse hidden lg:block" />
-      <div className="absolute top-1/4 right-1/4 w-16 h-16 bg-teal-100 rounded-full
-                      opacity-30 animate-bounce hidden xl:block" />
+  return (
+    <section 
+      className="relative w-full min-h-screen bg-cover bg-center bg-no-repeat overflow-hidden flex items-center justify-center"
+      style={{ 
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundColor: '#1e40af' // Fallback color if image fails to load
+      }}
+    >
+      {/* Gradient Overlay for better content readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 via-blue-800/60 to-blue-900/40" />
+      
+      {/* Additional overlay for content areas */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+      
+      {/* Floating Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-8 h-8 bg-white/20 rounded-full opacity-60 animate-float" />
+        <div className="absolute top-3/4 right-1/3 w-6 h-6 bg-teal-300/30 rounded-full opacity-40 animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 left-1/2 w-4 h-4 bg-blue-300/30 rounded-full opacity-35 animate-float" style={{ animationDelay: '3s' }} />
+      </div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Centered Content */}
+        <div 
+          ref={heroRef}
+          className={`max-w-4xl mx-auto text-center space-y-8 transform transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-4'
+          }`}
+          style={{ minHeight: '400px' }} // Ensure content area has minimum height
+        >
+          {/* Badge */}
+          <div className="inline-flex items-center px-6 py-3 bg-white/90 backdrop-blur-sm text-blue-600 rounded-full text-sm font-semibold border border-white/30 shadow-lg">
+            <span className="w-2 h-2 bg-blue-600 rounded-full mr-2 animate-pulse" />
+            Marine Innovation
+          </div>
+          
+          {/* Main Title */}
+          <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold leading-tight">
+            <span className="block text-white drop-shadow-2xl">
+              Barnaclean
+            </span>
+          </h1>
+          
+          {/* Subtitle */}
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-relaxed text-white/95 drop-shadow-lg">
+            <span className="text-teal-300">Reduce Costs</span>,{' '}
+            <span className="text-blue-300">Save Fuel</span>,{' '}
+            <span className="text-white">Protect Our Oceans</span>
+          </p>
+          
+          {/* Description */}
+          <p className="text-xl sm:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto drop-shadow-md">
+            Revolutionary AI-powered solutions for marine operations. Optimize your vessel's performance while contributing to ocean conservation through intelligent barnacle management.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 pt-8 justify-center">
+            <button className="px-10 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transform hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-2xl backdrop-blur-sm group text-lg">
+              <span className="mr-2">Get Started</span>
+              <FaRocket className="inline text-lg group-hover:translate-x-1 transition-transform duration-300" />
+            </button>
+            
+            <button className="px-10 py-5 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 hover:border-white/50 transition-all duration-300 group text-lg">
+              Learn More
+              <FaArrowRight className="ml-2 inline text-lg group-hover:translate-x-1 transition-transform duration-300" />
+            </button>
+          </div>
+          
+
+        </div>
+      </div>
     </section>
   );
 };

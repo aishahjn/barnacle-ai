@@ -1,72 +1,97 @@
 // About constants for the application
 export const ABOUT_CONTENT = {
-  title: 'About Us',
-  subtitle: 'ABOUT BARNACLEAN',
-  mainHeading: 'Innovating for a Sustainable Future',
+  title: 'About SeaWise',
+  subtitle: 'ABOUT BARNACLEAN & SEAWISE',
+  mainHeading: 'Innovating Marine Technology for Sustainable Shipping',
 };
 
-// Service Information section
+// Service Information section - Updated with BarnaClean process
 export const SERVICE_INFO = {
-  title: 'Our Services',
-  description: 'We specialize in predictive analytics for cost and fuel savings, helping businesses optimize their operations through advanced data analysis and real-time monitoring.',
-  features: [
-    'Predictive maintenance to prevent costly downtime',
-    'Real-time operational monitoring and insights',
-    'Automated alert systems for immediate action',
-    'Data-driven decision making for fuel efficiency'
+  subtitle: 'ABOUT BARNACLEAN TECHNOLOGY',
+  title: 'Our AI-Powered Marine Solution Process',
+  description: 'BarnaClean specializes in AI-driven biofouling prediction and route optimization, helping maritime operations achieve up to 30% fuel savings while protecting ocean ecosystems through advanced machine learning and real-time environmental analysis.',
+  processSteps: [
+    {
+      number: '01.',
+      title: 'Predict Biofouling Growth',
+      description: "AI model forecasts barnacle buildup in real-time using sea temperature, salinity, vessel speed, and idle time data."
+    },
+    {
+      number: '02.',
+      title: 'Optimize Route Planning',
+      description: 'A* algorithm calculates fuel-efficient paths considering weather, currents, and predicted hull drag from biofouling.'
+    },
+    {
+      number: '03.',
+      title: 'Deliver Fuel Savings',
+      description: 'Integrated system reduces fuel consumption by up to 30% while minimizing environmental impact and operational costs.'
+    }
   ]
 };
 
-// Company Information section
+// Company Information section - Updated with BarnaClean focus
 export const COMPANY_INFO = {
-  title: 'Our Company',
-  background: 'Founded with a vision to revolutionize industrial operations through technology, BarnaClean has become a leader in predictive analytics and operational optimization.',
-  mission: 'To empower businesses with intelligent solutions that reduce costs, improve efficiency, and promote sustainable practices through innovative technology.',
-  vision: 'A world where every industrial operation runs at peak efficiency, minimizing environmental impact while maximizing profitability.'
+  title: 'About BarnaClean',
+  background: 'Developed by the SeaWise team for MarineHack2025 Challenge 1, BarnaClean is an AI-driven biofouling prevention system that revolutionizes maritime operations through intelligent barnacle management and route optimization.',
+  mission: 'To predict and prevent biofouling for 30% fuel savings while protecting our oceans through innovative AI technology that optimizes vessel performance and reduces environmental impact.',
+  vision: 'A world where every vessel hull can tell you when to clean, enabling smart routing systems that cut fuel costs, lower emissions, and protect marine ecosystems with optimized, eco-friendly routes.'
 };
 
-// Team members data
+// Team members data - Updated with actual SeaWise team from BarnaClean document
 export const TEAM_MEMBERS = [
   {
-    name: 'Dr. Sarah Chen',
-    role: 'Chief Technology Officer',
-    bio: 'PhD in Data Science with 15+ years experience in predictive analytics and machine learning applications in industrial settings.',
-    image: null // Placeholder for future image integration
+    name: 'Nor Asyiqin Nazirah Binti Rapandi',
+    role: 'Pitcher & Product Presenter',
+    bio: 'Leads product presentation and business development initiatives for BarnaClean marine solutions.',
+    image: null, // Placeholder for future image integration
+    contact: '0128699358' // From document
   },
   {
-    name: 'Michael Rodriguez',
-    role: 'Head of Engineering',
-    bio: 'Former lead engineer at major oil & gas companies, specializing in operational optimization and system integration.',
+    name: 'Beldron Feadrek',
+    role: 'Team Leader & Frontend Developer',
+    bio: 'Technical team leader with expertise in frontend development and project coordination for marine technology solutions.',
     image: null
   },
   {
-    name: 'Emily Watson',
-    role: 'VP of Sustainability',
-    bio: 'Environmental engineer with expertise in sustainable operations and carbon footprint reduction strategies.',
+    name: 'Fernando George Anak Mani',
+    role: 'AI/ML Engineer',
+    bio: 'Specialist in artificial intelligence and machine learning, developing innovative biofouling prediction algorithms and route optimization systems.',
+    image: null
+  },
+  {
+    name: 'Iyzman Daniel Bin Mijir',
+    role: 'Backend Developer / Full Stack Engineer',
+    bio: 'Full-stack engineer focusing on robust Python (FastAPI) server development and AI engine integration for marine analytics.',
+    image: null
+  },
+  {
+    name: 'Unsiti Nur Aishah Binti Juan',
+    role: 'Big Data Analyst / Data Engineer',
+    bio: 'Data engineering specialist managing AIS data, marine weather patterns, and oceanographic datasets for predictive analytics.',
     image: null
   }
 ];
 
-// Impact statistics
+// Impact statistics - Updated with BarnaClean metrics
 export const IMPACT_STATS = [
   {
-    value: '40%',
-    label: 'Average Cost Reduction',
-    description: 'Our clients typically see 40% reduction in operational costs within the first year'
+    value: '30%',
+    label: 'Fuel Savings Achieved',
+    description: 'Average fuel consumption reduction through AI-optimized routing and biofouling prevention'
   },
   {
-    value: '25%',
-    label: 'Fuel Savings',
-    description: 'Significant fuel efficiency improvements through predictive maintenance'
+    value: '94.7%',
+    label: 'AI Model Accuracy',
+    description: 'Biofouling prediction model accuracy with real-time environmental data processing'
   },
   {
-    value: '60%',
-    label: 'Downtime Reduction',
-    description: 'Minimized operational downtime through early detection and prevention'
+    value: '18.5%',
+    label: 'Route Efficiency Gain',
+    description: 'Improved fuel efficiency through A* algorithm optimization considering weather and currents'
   },
   {
     value: '500K+',
-    label: 'Tons CO₂ Saved',
-    description: 'Environmental impact through optimized operations and reduced waste'
+    label: 'Tons CO₂ Prevented',
+    description: 'Environmental impact reduction through optimized maritime operations and reduced emissions'
   }
 ];

@@ -16,6 +16,16 @@ export const NAVIGATION_LINKS = [
     path: '/model',
   },
   {
+    id: 'demo',
+    label: 'Demo',
+    path: '/demo',
+  },
+  {
+    id: 'pricing',
+    label: 'Pricing',
+    path: '/pricing',
+  },
+  {
     id: 'about',
     label: 'About',
     path: '/about',

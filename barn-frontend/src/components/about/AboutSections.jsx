@@ -1,7 +1,6 @@
 import React from 'react';
 import AboutHero from './AboutHero';
 import AboutServices from './AboutServices';
-import AboutCompany from './AboutCompany';
 import AboutTeam from './AboutTeam';
 import AboutImpact from './AboutImpact';
 
@@ -13,7 +12,6 @@ const AboutSections = () => {
     <div className="w-full">
       <AboutHero />
       <AboutServices />
-      <AboutCompany />
       <AboutTeam />
       <AboutImpact />
     </div>
