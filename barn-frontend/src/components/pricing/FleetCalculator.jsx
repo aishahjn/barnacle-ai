@@ -12,7 +12,9 @@ const FleetCalculator = ({ fleetSize, setFleetSize, calculatedSavings }) => {
     notifications.fleet.reportGenerated(`Fleet calculation updated for ${newSize} vessels`);
   };
 
+  // Prevent from ROI to be displayed
   // Notify when significant savings are calculated
+  /*
   useEffect(() => {
     if (calculatedSavings && calculatedSavings.roi > 200) {
       notifications.user.actionCompleted(
@@ -20,6 +22,8 @@ const FleetCalculator = ({ fleetSize, setFleetSize, calculatedSavings }) => {
       );
     }
   }, [calculatedSavings]); // Remove notifications from dependencies to prevent infinite loop
+  */
+
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8">
       <div className="text-center mb-6">
