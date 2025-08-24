@@ -6,6 +6,7 @@ import predictionsReducer from './Slices/predictionSlice';
 import uiReducer from './Slices/uiSlice';
 import alertsReducer from './Slices/alertsSlice';
 import esgReducer from './Slices/esgSlice';
+import notificationMiddleware from './middleware/notificationMiddleware';
 
 const store = configureStore({
   reducer: {
@@ -36,7 +37,7 @@ const store = configureStore({
           'esg.lastUpdate'
         ],
       },
-    }),
+    }).concat(notificationMiddleware),
 });
 
 export default store;

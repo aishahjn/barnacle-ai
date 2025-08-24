@@ -1,8 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaCalculator, FaDollarSign, FaRocket, FaStar, FaCheck } from 'react-icons/fa';
 import { MetricCard } from '../shared/Charts';
+import { useMaritimeNotifications } from '../../hooks/useMaritimeNotifications';
 
 const FleetCalculator = ({ fleetSize, setFleetSize, calculatedSavings }) => {
+  const notifications = useMaritimeNotifications();
+
+  // Handle fleet size change with notification
+  const handleFleetSizeChange = (newSize) => {
+    setFleetSize(newSize);
+    notifications.fleet.reportGenerated(`Fleet calculation updated for ${newSize} vessels`);
+  };
+
+  // Notify when significant savings are calculated
+  useEffect(() => {
+    if (calculatedSavings && calculatedSavings.roi > 200) {
+      notifications.user.actionCompleted(
+        `Excellent ROI calculated: ${calculatedSavings.roi.toFixed(0)}% return on investment`
+      );
+    }
+  }, [calculatedSavings, notifications]);
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8">
       <div className="text-center mb-6">
@@ -26,7 +43,7 @@ const FleetCalculator = ({ fleetSize, setFleetSize, calculatedSavings }) => {
               min="1"
               max="100"
               value={fleetSize}
-              onChange={(e) => setFleetSize(parseInt(e.target.value) || 1)}
+              onChange={(e) => handleFleetSizeChange(parseInt(e.target.value) || 1)}
               className="w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-cyan-200"
             />
           </div>

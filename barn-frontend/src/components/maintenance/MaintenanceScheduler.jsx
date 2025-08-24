@@ -3,6 +3,7 @@ import { FaCalendarAlt, FaCog, FaClock, FaDollarSign, FaWrench, FaShip, FaChartL
 import { DESIGN_TOKENS } from '../../constants/designTokens';
 import { MetricCard, StatusBadge, Alert, ProgressBar } from '../shared/Charts';
 import Loading from '../shared/Loading';
+import { useMaritimeNotifications } from '../../hooks/useMaritimeNotifications';
 
 /**
  * MaintenanceScheduler Component  
@@ -21,16 +22,33 @@ const MaintenanceScheduler = () => {
   const [selectedVessel, setSelectedVessel] = useState('mv_pacific_star');
   const [scheduleView, setScheduleView] = useState('monthly');
   const [maintenanceData, setMaintenanceData] = useState(null);
+  
+  // Initialize maritime notifications
+  const notifications = useMaritimeNotifications();
 
   useEffect(() => {
     // Simulate loading maintenance scheduling data
+    notifications.system.dataProcessing('Maintenance data', 'loading');
+    
     const timer = setTimeout(() => {
       setIsLoading(false);
       setMaintenanceData(generateMaintenanceData());
+      
+      // Notify when data is loaded
+      notifications.system.dataProcessing('Maintenance schedules', 'completed');
+      
+      // Check for urgent maintenance items
+      const urgentItems = generateMaintenanceData().schedule.filter(item => item.priority === 'urgent');
+      if (urgentItems.length > 0) {
+        notifications.vessel.maintenanceScheduled(
+          urgentItems[0].vessel, 
+          urgentItems[0].date
+        );
+      }
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [notifications]);
 
   // Generate mock maintenance scheduling data
   const generateMaintenanceData = () => {
@@ -126,6 +144,18 @@ const MaintenanceScheduler = () => {
   const vessels = maintenanceData?.vessels || {};
   const currentVessel = vessels[selectedVessel];
 
+  // Handle vessel selection with notification
+  const handleVesselSelection = (vesselKey, vesselName) => {
+    setSelectedVessel(vesselKey);
+    notifications.user.actionCompleted(`Selected vessel: ${vesselName}`);
+  };
+
+  // Handle schedule view change with notification
+  const handleScheduleViewChange = (view) => {
+    setScheduleView(view);
+    notifications.user.actionCompleted(`Switched to ${view} view`);
+  };
+
   const priorityColors = {
     urgent: { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500' },
     recommended: { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500' },
@@ -220,7 +250,7 @@ const MaintenanceScheduler = () => {
               {Object.entries(vessels).map(([key, vessel]) => (
                 <button
                   key={key}
-                  onClick={() => setSelectedVessel(key)}
+                  onClick={() => handleVesselSelection(key, vessel.name)}
                   className={`w-full text-left p-3 rounded-lg transition-all ${
                     selectedVessel === key
                       ? 'bg-blue-600 text-white'
@@ -317,7 +347,7 @@ const MaintenanceScheduler = () => {
           </h3>
           <div className="flex gap-2">
             <button
-              onClick={() => setScheduleView('monthly')}
+              onClick={() => handleScheduleViewChange('monthly')}
               className={`px-3 py-1 rounded text-sm ${
                 scheduleView === 'monthly' ? 'bg-blue-600 text-white' : 'bg-white/20 text-cyan-100'
               }`}
@@ -325,7 +355,7 @@ const MaintenanceScheduler = () => {
               Monthly
             </button>
             <button
-              onClick={() => setScheduleView('quarterly')}
+              onClick={() => handleScheduleViewChange('quarterly')}
               className={`px-3 py-1 rounded text-sm ${
                 scheduleView === 'quarterly' ? 'bg-blue-600 text-white' : 'bg-white/20 text-cyan-100'
               }`}

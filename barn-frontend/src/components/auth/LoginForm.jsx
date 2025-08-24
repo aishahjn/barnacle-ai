@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { FaEye, FaEyeSlash, FaGoogle, FaGithub, FaApple, FaExclamationTriangle } from 'react-icons/fa';
 import { HiMail, HiLockClosed } from 'react-icons/hi';
 import { InlineLoading } from '../shared/Loading';
 import { selectLoginError, selectIsLoading } from '../../redux/Slices/userSlice';
+import { useMaritimeNotifications } from '../../hooks/useMaritimeNotifications';
 
 const LoginForm = ({ onToggleMode, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,16 @@ const LoginForm = ({ onToggleMode, onSubmit }) => {
   // Redux selectors
   const loginError = useSelector(selectLoginError);
   const isLoading = useSelector(selectIsLoading);
+  
+  // Maritime notifications
+  const notifications = useMaritimeNotifications();
+
+  // Show error notification when login fails
+  useEffect(() => {
+    if (loginError) {
+      notifications.system.error(`Login failed: ${loginError}`);
+    }
+  }, [loginError, notifications]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -30,15 +41,18 @@ const LoginForm = ({ onToggleMode, onSubmit }) => {
     e.preventDefault();
     if (onSubmit && !isLoading) {
       try {
+        notifications.system.dataProcessing('Authentication', 'processing');
         await onSubmit(formData);
+        notifications.user.actionCompleted('Login successful');
       } catch (error) {
-        // Error handling is managed by Redux
+        // Error handling is managed by Redux and useEffect
         console.error('Login failed:', error);
       }
     }
   };
 
   const handleSocialLogin = (provider) => {
+    notifications.system.dataProcessing(`${provider} authentication`, 'starting');
     // Social authentication integration would be implemented here
   };
 
