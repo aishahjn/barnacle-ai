@@ -27,7 +27,7 @@ const LoginForm = ({ onToggleMode, onSubmit }) => {
     if (loginError) {
       notifications.system.error(`Login failed: ${loginError}`);
     }
-  }, [loginError, notifications]);
+  }, [loginError]); // Remove notifications from dependencies to prevent infinite loop
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

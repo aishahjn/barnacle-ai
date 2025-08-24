@@ -19,7 +19,7 @@ const FleetCalculator = ({ fleetSize, setFleetSize, calculatedSavings }) => {
         `Excellent ROI calculated: ${calculatedSavings.roi.toFixed(0)}% return on investment`
       );
     }
-  }, [calculatedSavings, notifications]);
+  }, [calculatedSavings]); // Remove notifications from dependencies to prevent infinite loop
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mb-8">
       <div className="text-center mb-6">

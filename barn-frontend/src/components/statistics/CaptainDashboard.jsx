@@ -3,6 +3,7 @@ import { FaExpand, FaMapMarkerAlt, FaThermometerHalf, FaTint, FaWind, FaWater, F
 import { formatValue, getFoulingStyles } from '../../utils/dataProcessing';
 import { REAL_BIOFOULING_DATA } from '../../utils/csvDataLoader'; // Updated import
 import { MetricCard, StatusBadge, Alert, ProgressBar } from '../shared/Charts';
+import Loading from '../shared/Loading';
 
 /**
  * Enhanced Captain Dashboard Component
@@ -94,10 +95,14 @@ const CaptainDashboard = () => {
   
   if (!vesselData) {
     return (
-      <div className="w-full flex items-center justify-center py-12">
-        <div className="text-center space-y-4">
-          <FaShip className="text-4xl text-blue-500 animate-pulse mx-auto" />
-          <p className="text-gray-500">Loading vessel data...</p>
+      <div className="w-full space-y-6">
+        <div className="text-center">
+          <Loading 
+            size="large" 
+            text="Loading vessel data..." 
+            variant="maritime"
+            color="white"
+          />
         </div>
       </div>
     );

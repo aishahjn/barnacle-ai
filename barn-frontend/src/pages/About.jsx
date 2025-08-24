@@ -1,44 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import AboutSections from '../components/about/AboutSections'
-import Loading from '../components/shared/Loading'
 import { DESIGN_TOKENS } from '../constants/designTokens'
 import { MantaRay, Shark, Whale, Lighthouse, Anchor, Submarine, Fish, Jellyfish, Starfish, Seaweed } from '../components/shared/MarineElement'
 
 const About = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate content loading with a brief delay
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto px-4">
-          <Loading 
-            size="large" 
-            text="Loading About Section..." 
-            variant="default"
-            color="blue"
-          />
-          <div className="space-y-3">
-            <p className="text-white text-lg font-medium">
-              Discovering our marine mission
-            </p>
-            <div className="flex items-center justify-center space-x-2 text-cyan-100 text-sm">
-              <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-              <span>Loading team and impact data...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
   return (
     <div className="w-full relative overflow-hidden">
       {/* Enhanced Marine Background Elements */}

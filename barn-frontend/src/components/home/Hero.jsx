@@ -1,22 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FaRocket, FaArrowRight } from 'react-icons/fa';
 import { DESIGN_TOKENS } from '../../constants/designTokens';
-import Loading from '../shared/Loading';
 import backgroundImage from '../../assets/background.jpg';
 
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const heroRef = useRef(null);
 
-
-
   useEffect(() => {
-    // Reduced loading time for better user experience
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-
     // Set visible immediately and use intersection observer for animations
     setIsVisible(true);
 
@@ -29,43 +20,14 @@ const Hero = () => {
       { threshold: 0.1, rootMargin: '50px' }
     );
 
-    // Delay observer setup until after loading
-    const observerTimer = setTimeout(() => {
-      if (heroRef.current && !isLoading) {
-        observer.observe(heroRef.current);
-      }
-    }, 400);
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
 
     return () => {
-      clearTimeout(loadingTimer);
-      clearTimeout(observerTimer);
       observer.disconnect();
     };
-  }, [isLoading]);
-
-  if (isLoading) {
-    return (
-      <section className="relative w-full min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto px-4">
-          <Loading 
-            size="large" 
-            text="Loading Marine Solutions..." 
-            variant="default"
-            color="blue"
-          />
-          <div className="space-y-3">
-            <p className="text-white text-lg font-medium">
-              Preparing your ocean conservation dashboard
-            </p>
-            <div className="flex items-center justify-center space-x-2 text-cyan-100 text-sm">
-              <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-              <span>Initializing marine AI systems...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  }, []);
 
   return (
     <section 

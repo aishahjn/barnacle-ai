@@ -48,7 +48,7 @@ const MaintenanceScheduler = () => {
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [notifications]);
+  }, []); // Removed notifications from dependency array to prevent infinite loop
 
   // Generate mock maintenance scheduling data
   const generateMaintenanceData = () => {
@@ -179,8 +179,8 @@ const MaintenanceScheduler = () => {
           <Loading 
             size="large" 
             text="Loading maintenance schedules..." 
-            variant="default"
-            color="blue"
+            variant="maritime"
+            color="white"
           />
         </div>
       </div>

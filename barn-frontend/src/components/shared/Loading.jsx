@@ -12,7 +12,7 @@ const Loading = ({
   progress = null, 
   showPercentage = false,
   variant = 'default', // 'default', 'dots', 'bar'
-  color = 'gray' // 'gray', 'blue', 'green'
+  color = 'gray' // 'gray', 'blue', 'green', 'white', 'maritime'
 }) => {
 
   const sizeClasses = {
@@ -39,11 +39,23 @@ const Loading = ({
       accent: 'border-green-600',
       text: 'text-green-600',
       progress: 'bg-green-600'
+    },
+    white: {
+      primary: 'border-white/30',
+      accent: 'border-white',
+      text: 'text-white',
+      progress: 'bg-white'
+    },
+    maritime: {
+      primary: 'border-cyan-200',
+      accent: 'border-cyan-400',
+      text: 'text-white',
+      progress: 'bg-cyan-400'
     }
   };
 
-  const currentColor = colorClasses[color];
-  const currentSize = sizeClasses[size];
+  const currentColor = colorClasses[color] || colorClasses.gray; // Fallback to gray if color is invalid
+  const currentSize = sizeClasses[size] || sizeClasses.medium; // Fallback to medium if size is invalid
 
   const renderDefaultLoader = () => (
     <div className="relative">

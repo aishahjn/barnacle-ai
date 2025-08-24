@@ -1,10 +1,31 @@
-import { enqueueSnackbar } from 'notistack';
-import { MARITIME_NOTIFICATION_TYPES } from '../../utils/notificationUtils';
-
 /**
  * Redux middleware to automatically trigger toast notifications
  * for critical alerts and important system events
+ * Uses the custom maritime notification system
  */
+
+// Maritime notification types for the custom system
+const MARITIME_NOTIFICATION_TYPES = {
+  VESSEL_UPDATE: 'vessel',
+  MAINTENANCE: 'maintenance', 
+  BIOFOULING: 'biofouling',
+  ROUTE_OPTIMIZATION: 'route',
+  WEATHER_ALERT: 'weather',
+  FLEET_OPERATION: 'fleet',
+  ESG_UPDATE: 'esg',
+  DATA_SYNC: 'sync',
+  USER_ACTION: 'success',
+  SYSTEM: 'info'
+};
+
+// Global reference to the notification system
+// This will be set by the MaritimeToastProvider
+let globalNotificationSystem = null;
+
+export const setGlobalNotificationSystem = (notificationSystem) => {
+  globalNotificationSystem = notificationSystem;
+};
+
 export const notificationMiddleware = (store) => (next) => (action) => {
   const result = next(action);
   
@@ -12,8 +33,8 @@ export const notificationMiddleware = (store) => (next) => (action) => {
   const state = store.getState();
   const alertSettings = state.alerts?.settings;
   
-  // Only proceed if notifications are enabled
-  if (!alertSettings?.enableNotifications) {
+  // Only proceed if notifications are enabled and we have the notification system
+  if (!alertSettings?.enableNotifications || !globalNotificationSystem) {
     return result;
   }
 
@@ -25,38 +46,15 @@ export const notificationMiddleware = (store) => (next) => (action) => {
       // Auto-toast critical and high severity alerts
       if (alert.severity === 'high' || alert.severity === 'critical') {
         const icon = getAlertIcon(alert.category);
-        const message = `${icon} ${alert.title}: ${alert.message}`;
+        const message = `${alert.title}: ${alert.message}`;
         
-        enqueueSnackbar(message, {
-          variant: alert.type === 'error' ? 'error' : 'warning',
-          autoHideDuration: alert.severity === 'critical' ? null : 6000,
+        globalNotificationSystem.addToast(message, {
+          type: alert.type === 'error' ? 'error' : 'warning',
+          icon: icon,
+          duration: alert.severity === 'critical' ? 0 : 6000,
           persist: alert.severity === 'critical',
-          preventDuplicate: true,
-          anchorOrigin: {
-            vertical: 'top',
-            horizontal: 'center'
-          },
-          action: alert.severity === 'critical' ? (key) => {
-            // Create a simple button element without JSX
-            const button = document.createElement('button');
-            button.textContent = 'Acknowledge';
-            button.style.cssText = `
-              color: white;
-              background-color: rgba(255,255,255,0.2);
-              border: none;
-              padding: 4px 8px;
-              border-radius: 4px;
-              cursor: pointer;
-              font-size: 12px;
-            `;
-            button.onclick = () => {
-              // Mark as acknowledged in Redux
-              store.dispatch({ type: 'alerts/markAsRead', payload: alert.id });
-              // Close notification
-              import('notistack').then(({ closeSnackbar }) => closeSnackbar(key));
-            };
-            return button;
-          } : undefined
+          priority: alert.severity === 'critical' ? 'high' : 'normal',
+          subtitle: alert.severity === 'critical' ? 'Critical Alert - Please Acknowledge' : undefined
         });
       }
       break;
@@ -69,35 +67,40 @@ export const notificationMiddleware = (store) => (next) => (action) => {
       const dataType = action.type.includes('AIS') ? 'AIS' : 
                       action.type.includes('Weather') ? 'Weather' : 'Ocean currents';
       
-      enqueueSnackbar(`🔄 ${dataType} data updated successfully`, {
-        variant: 'info',
-        autoHideDuration: 2000,
-        anchorOrigin: { vertical: 'bottom', horizontal: 'right' }
+      globalNotificationSystem.addToast(`${dataType} data updated successfully`, {
+        type: 'sync',
+        icon: '🔄',
+        duration: 2000
       });
       break;
     }
 
     case 'fleet/scheduleMaintenanceAsync/fulfilled': {
       const { vesselName, date } = action.meta.arg;
-      enqueueSnackbar(`🔧 Maintenance scheduled for ${vesselName} on ${date}`, {
-        variant: 'success',
-        autoHideDuration: 4000
+      globalNotificationSystem.addToast(`Maintenance scheduled for ${vesselName}`, {
+        type: 'maintenance',
+        icon: '🔧',
+        subtitle: `Scheduled for ${date}`,
+        vesselId: vesselName,
+        duration: 4000
       });
       break;
     }
 
     case 'predictions/generatePredictions/fulfilled': {
-      enqueueSnackbar('🧠 Biofouling predictions updated', {
-        variant: 'success',
-        autoHideDuration: 3000
+      globalNotificationSystem.addToast('Biofouling predictions updated', {
+        type: 'biofouling',
+        icon: '🧠',
+        duration: 3000
       });
       break;
     }
 
     case 'esg/updateESGTargets/fulfilled': {
-      enqueueSnackbar('🌱 ESG targets updated successfully', {
-        variant: 'success',
-        autoHideDuration: 3000
+      globalNotificationSystem.addToast('ESG targets updated successfully', {
+        type: 'esg',
+        icon: '🌱',
+        duration: 3000
       });
       break;
     }
@@ -106,9 +109,10 @@ export const notificationMiddleware = (store) => (next) => (action) => {
     case 'marineData/fetchAISData/rejected':
     case 'marineData/fetchWeatherData/rejected':
     case 'fleet/fetchFleetData/rejected': {
-      enqueueSnackbar('⚠️ Failed to sync marine data', {
-        variant: 'error',
-        autoHideDuration: 5000,
+      globalNotificationSystem.addToast('Failed to sync marine data', {
+        type: 'error',
+        icon: '⚠️',
+        duration: 5000,
         persist: false
       });
       break;

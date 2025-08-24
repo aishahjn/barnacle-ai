@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaBrain, FaChartLine, FaRoute, FaCog, FaDatabase, FaCloudDownloadAlt, FaInfoCircle, FaCheckCircle, FaExclamationTriangle, FaRocket, FaMicrochip, FaNetworkWired, FaChartBar } from 'react-icons/fa';
 import { DESIGN_TOKENS } from '../constants/designTokens';
-import Loading from '../components/shared/Loading';
 import { MetricCard, StatusBadge, Alert, ProgressBar } from '../components/shared/Charts';
 import { REAL_BIOFOULING_DATA, calculateFleetMetrics } from '../utils/csvDataLoader';
 
@@ -21,18 +20,8 @@ import { REAL_BIOFOULING_DATA, calculateFleetMetrics } from '../utils/csvDataLoa
  */
 
 const Model = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [activeModel, setActiveModel] = useState('biofouling');
   const [expandedSection, setExpandedSection] = useState(null);
-  
-  useEffect(() => {
-    // Simulate loading AI models
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-
-    return () => clearTimeout(timer);
-  }, []);
   
   // AI Models Configuration - Updated with real data insights
   const aiModels = {
@@ -125,30 +114,6 @@ const Model = () => {
   const handleSectionToggle = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
-  
-  if (isLoading) {
-    return (
-      <section className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex items-center justify-center pt-32">
-        <div className="text-center space-y-6 max-w-md mx-auto px-4">
-          <Loading 
-            size="large" 
-            text="Loading AI Models..." 
-            variant="default"
-            color="blue"
-          />
-          <div className="space-y-3">
-            <p className="text-white text-lg font-medium">
-              Initializing AI Systems
-            </p>
-            <div className="flex items-center justify-center space-x-2 text-cyan-100 text-sm">
-              <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-              <span>Loading models...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
   
   return (
     <section className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 pt-32 pb-32">

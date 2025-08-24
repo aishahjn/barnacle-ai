@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import Loading from '../components/shared/Loading';
 import { Fish, Whale, Octopus, Seahorse } from '../components/shared/MarineElement';
 
 // Pricing Components
@@ -27,19 +26,10 @@ import { PRICING_PLANS, FLEET_CALCULATOR_CONFIG } from '../constants/pricingCons
  */
 
 const Pricing = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState('professional');
   const [billingPeriod, setBillingPeriod] = useState('annual');
   const [fleetSize, setFleetSize] = useState(5);
   const [calculatedSavings, setCalculatedSavings] = useState(null);
-
-  useEffect(() => {
-    // Simulate loading pricing data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Use pricing plans from constants
   const pricingPlans = PRICING_PLANS;
@@ -79,30 +69,6 @@ const Pricing = () => {
   useEffect(() => {
     calculateFleetLicensing();
   }, [calculateFleetLicensing]);
-
-  if (isLoading) {
-    return (
-      <section className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex items-center justify-center pt-32">
-        <div className="text-center space-y-6 max-w-md mx-auto px-4">
-          <Loading 
-            size="large" 
-            text="Loading Pricing Plans..." 
-            variant="default"
-            color="blue"
-          />
-          <div className="space-y-3">
-            <p className="text-white text-lg font-medium">
-              Calculating your savings potential
-            </p>
-            <div className="flex items-center justify-center space-x-2 text-cyan-100 text-sm">
-              <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-              <span>Loading subscription options...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 pt-32 pb-32 relative overflow-hidden">

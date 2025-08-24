@@ -1,5 +1,6 @@
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { setGlobalNotificationSystem } from '../../redux/middleware/notificationMiddleware';
 
 const ToastContext = createContext();
 
@@ -7,8 +8,22 @@ export { ToastContext };
 
 export const MaritimeToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
+  const notificationSystemRef = useRef();
+  const recentMessagesRef = useRef(new Set());
 
   const addToast = useCallback((message, options = {}) => {
+    // Enhanced duplicate prevention with longer window and type consideration
+    const messageKey = `${message}-${options.type || 'info'}-${options.subtitle || ''}`;
+    if (recentMessagesRef.current.has(messageKey)) {
+      return null; // Skip duplicate
+    }
+    
+    // Add to recent messages and remove after 3 seconds to prevent spam
+    recentMessagesRef.current.add(messageKey);
+    setTimeout(() => {
+      recentMessagesRef.current.delete(messageKey);
+    }, 3000);
+
     const id = Date.now() + Math.random();
     const toast = {
       id,
@@ -41,6 +56,19 @@ export const MaritimeToastProvider = ({ children }) => {
   const removeAllToasts = useCallback(() => {
     setToasts([]);
   }, []);
+
+  // Update the ref with latest functions
+  notificationSystemRef.current = { addToast, removeToast, removeAllToasts };
+
+  // Set up global notification system for Redux middleware - only once on mount
+  useEffect(() => {
+    const getLatestSystem = () => notificationSystemRef.current;
+    setGlobalNotificationSystem({
+      addToast: (message, options) => getLatestSystem().addToast(message, options),
+      removeToast: (id) => getLatestSystem().removeToast(id),
+      removeAllToasts: () => getLatestSystem().removeAllToasts()
+    });
+  }, []); // Empty dependency array - run only once on mount
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast, removeAllToasts }}>

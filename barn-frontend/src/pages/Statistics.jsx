@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaChartBar, FaShip, FaIndustry, FaTachometerAlt, FaUser, FaCog, FaInfoCircle, FaChartLine, FaMap, FaGlobe, FaBroadcastTower, FaCalendarAlt } from 'react-icons/fa';
 import { DESIGN_TOKENS } from '../constants/designTokens';
 import BiofoulingPredictor from '../components/statistics/BiofoulingPredictor';
@@ -9,7 +9,6 @@ import RouteOptimizer from '../components/routing/RouteOptimizer';
 import ESGDashboard from '../components/sustainability/ESGDashboard';
 import RealTimeDataDashboard from '../components/data/RealTimeDataDashboard';
 import MaintenanceScheduler from '../components/maintenance/MaintenanceScheduler';
-import Loading from '../components/shared/Loading';
 import { Alert } from '../components/shared/Charts';
 
 /**
@@ -29,7 +28,6 @@ import { Alert } from '../components/shared/Charts';
 
 const Statistics = () => {
   const [activeTab, setActiveTab] = useState('fleet');
-  const [isLoading, setIsLoading] = useState(true);
   
   // Tab configuration following Nielsen's Heuristic 2: Match between system and real world
   const tabs = [
@@ -99,55 +97,15 @@ const Statistics = () => {
     }
   ];
   
-  // Nielsen Heuristic 1: Visibility of system status
-  useEffect(() => {
-    // Simulate initial data loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-
-    return () => clearTimeout(timer);
-  }, []);
-  
   // Nielsen Heuristic 3: User control and freedom
   const handleTabChange = (tabId) => {
     if (tabId !== activeTab) {
-      setIsLoading(true);
       setActiveTab(tabId);
-      
-      // Simulate loading new dashboard data
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 600);
     }
   };
   
   const currentTab = tabs.find(tab => tab.id === activeTab);
   const ActiveComponent = currentTab?.component;
-  
-  if (isLoading && activeTab === 'fleet') {
-    return (
-      <section className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 flex items-center justify-center pt-32">
-        <div className="text-center space-y-6 max-w-md mx-auto px-4">
-          <Loading 
-            size="large" 
-            text="Loading BarnaClean Analytics..." 
-            variant="default"
-            color="blue"
-          />
-          <div className="space-y-3">
-            <p className="text-white text-lg font-medium">
-              Initializing systems
-            </p>
-            <div className="flex items-center justify-center space-x-2 text-cyan-100 text-sm">
-              <div className="w-2 h-2 bg-cyan-300 rounded-full animate-pulse"></div>
-              <span>Loading vessel data...</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
   
   return (
     <section className="min-h-screen bg-gradient-to-br from-blue-900 to-cyan-800 pt-32 pb-32">
@@ -166,35 +124,46 @@ const Statistics = () => {
         </div>
         
         {/* Tab Navigation */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
+        <div className="bg-white/15 backdrop-blur-md rounded-2xl p-3 mb-8 border border-white/20 shadow-lg">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`group relative min-w-0 flex-1 overflow-hidden py-2 px-2 lg:py-3 lg:px-3 text-center text-xs lg:text-sm font-medium transition-all duration-200 rounded-xl ${
+                  className={`group relative min-w-0 flex-1 overflow-hidden py-3 px-3 lg:py-4 lg:px-4 text-center text-xs lg:text-sm font-semibold transition-all duration-300 rounded-xl transform hover:scale-105 ${
                     isActive
-                      ? 'text-blue-600 bg-white shadow-lg'
-                      : 'text-white hover:text-blue-100 hover:bg-white/20'
+                      ? 'bg-white text-blue-700 shadow-xl border-2 border-blue-200'
+                      : 'bg-white/10 text-white hover:bg-white/25 hover:text-white border-2 border-transparent hover:border-white/30'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                   title={tab.description}
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <span className={`text-lg transition-colors ${
-                      isActive ? 'text-blue-600' : 'text-cyan-300 group-hover:text-blue-200'
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className={`text-xl lg:text-2xl transition-all duration-300 ${
+                      isActive ? 'text-blue-600' : 'text-cyan-300 group-hover:text-white'
                     }`}>
                       {tab.icon}
                     </span>
-                    <span className="hidden sm:inline font-semibold">{tab.label}</span>
+                    <div className="space-y-1">
+                      <div className={`font-bold text-xs lg:text-sm transition-colors ${
+                        isActive ? 'text-blue-700' : 'text-white group-hover:text-white'
+                      }`}>
+                        {tab.label}
+                      </div>
+                      <div className={`text-xs font-medium transition-colors ${
+                        isActive ? 'text-blue-500' : 'text-cyan-200 group-hover:text-cyan-100'
+                      }`}>
+                        {tab.userRole}
+                      </div>
+                    </div>
                   </div>
-                  <div className={`text-xs mt-1 transition-colors ${
-                    isActive ? 'text-blue-500' : 'text-cyan-200'
-                  }`}>
-                    {tab.userRole}
-                  </div>
+                  
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-full animate-pulse" />
+                  )}
                 </button>
               );
             })}
@@ -203,31 +172,12 @@ const Statistics = () => {
         
         {/* Dashboard Content */}
         <div className="space-y-6">
-          {/* Loading State for Tab Switching */}
-          {isLoading ? (
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-20">
-              <div className="flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <Loading 
-                    size="large" 
-                    text={`Loading ${currentTab?.label}...`}
-                    variant="default"
-                    color="blue"
-                  />
-                  <p className="text-cyan-100">
-                    Loading {currentTab?.userRole.toLowerCase()} view
-                  </p>
-                </div>
-              </div>
+          {/* Active Dashboard Component */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/20">
+            <div className="transition-all duration-300 ease-in-out">
+              {ActiveComponent && <ActiveComponent />}
             </div>
-          ) : (
-            /* Active Dashboard Component */
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/20">
-              <div className="transition-all duration-300 ease-in-out">
-                {ActiveComponent && <ActiveComponent />}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
         
         {/* Footer */}

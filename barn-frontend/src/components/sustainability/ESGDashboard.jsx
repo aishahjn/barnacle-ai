@@ -123,8 +123,8 @@ const ESGDashboard = () => {
           <Loading 
             size="large" 
             text="Loading ESG Analytics..." 
-            variant="default"
-            color="blue"
+            variant="maritime"
+            color="white"
           />
         </div>
       </div>

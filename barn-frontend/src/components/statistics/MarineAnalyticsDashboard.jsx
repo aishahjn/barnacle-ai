@@ -10,6 +10,7 @@ import {
   Alert,
   StatusBadge
 } from '../shared/Charts';
+import Loading from '../shared/Loading';
 import {
   selectEnvironmentalData,
   selectMarineDataLoading,
@@ -195,10 +196,14 @@ const MarineAnalyticsDashboard = () => {
   // Loading state handling
   if (isLoading) {
     return (
-      <div className="w-full space-y-6 p-4 lg:p-6">
+      <div className="w-full space-y-6">
         <div className="text-center">
-          <div className="text-xl lg:text-2xl font-bold text-white mb-2">Loading Marine Analytics...</div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+          <Loading 
+            size="large" 
+            text="Loading Marine Analytics..." 
+            variant="maritime"
+            color="white"
+          />
         </div>
       </div>
     );

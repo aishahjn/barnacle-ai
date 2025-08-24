@@ -4,6 +4,7 @@ import { FaShip, FaIndustry, FaExclamationTriangle, FaClock, FaChartLine, FaDown
 import { DESIGN_TOKENS } from '../../constants/designTokens';
 import { getFoulingStyles } from '../../utils/dataProcessing';
 import { MetricCard, StatusBadge, DataTable, Alert, SimpleLineChart } from '../shared/Charts';
+import Loading from '../shared/Loading';
 import {
   selectFleetVessels,
   selectFleetSummary,
@@ -170,10 +171,14 @@ const FleetOperatorDashboard = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="w-full flex items-center justify-center py-12">
-        <div className="text-center space-y-4">
-          <FaIndustry className="text-4xl text-blue-500 animate-pulse mx-auto" />
-          <p className="text-gray-500">Loading fleet data...</p>
+      <div className="w-full space-y-6">
+        <div className="text-center">
+          <Loading 
+            size="large" 
+            text="Loading Fleet data..." 
+            variant="maritime"
+            color="white"
+          />
         </div>
       </div>
     );

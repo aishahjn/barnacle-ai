@@ -98,8 +98,8 @@ const RealTimeDataDashboard = () => {
           <Loading 
             size="large" 
             text="Connecting to real-time data sources..." 
-            variant="default"
-            color="blue"
+            variant="maritime"
+            color="white"
           />
         </div>
       </div>
