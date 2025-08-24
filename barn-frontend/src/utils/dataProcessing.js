@@ -190,7 +190,14 @@ export const processFleetData = (rawData = DEMO_BIOFOULING_DATA) => {
   
   const totalVessels = vessels.length;
   const activeVessels = vessels.filter(v => v.status === 'En Route').length;
-  const avgFuelPenalty = vessels.reduce((sum, v) => sum + parseFloat(v.fuelPenalty.slice(1, -2)), 0) / totalVessels;
+  const avgFuelPenalty = vessels.reduce((sum, v) => {
+    const fuelPenaltyStr = v.fuelPenalty || '+0.0/h';
+    if (fuelPenaltyStr.length > 4) {
+      const numericPart = parseFloat(fuelPenaltyStr.slice(1, -2));
+      return sum + (numericPart || 0);
+    }
+    return sum;
+  }, 0) / totalVessels;
   const maintenanceFlags = vessels.filter(v => v.foulingClass === 'high').length;
   
   return {

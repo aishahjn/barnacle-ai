@@ -167,7 +167,7 @@ const Statistics = () => {
         
         {/* Tab Navigation */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 mb-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (

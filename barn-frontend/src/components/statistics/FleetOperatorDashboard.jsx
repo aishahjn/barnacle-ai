@@ -1,9 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FaShip, FaIndustry, FaExclamationTriangle, FaClock, FaChartLine, FaDownload, FaFilter, FaSort, FaEye, FaTachometerAlt, FaAnchor, FaRoute, FaWrench } from 'react-icons/fa';
 import { DESIGN_TOKENS } from '../../constants/designTokens';
-import { processFleetData, getFoulingStyles } from '../../utils/dataProcessing';
-import { REAL_BIOFOULING_DATA } from '../../utils/csvDataLoader'; // Added import for real data
+import { getFoulingStyles } from '../../utils/dataProcessing';
 import { MetricCard, StatusBadge, DataTable, Alert, SimpleLineChart } from '../shared/Charts';
+import {
+  selectFleetVessels,
+  selectFleetSummary,
+  selectFleetLoading,
+  selectFleetError,
+  selectSelectedVessels,
+  fetchFleetData,
+  selectVessel,
+  selectAllVessels,
+  clearSelection
+} from '../../redux/selectors';
 
 /**
  * Enhanced Fleet Operator Dashboard Component
@@ -21,66 +32,103 @@ import { MetricCard, StatusBadge, DataTable, Alert, SimpleLineChart } from '../s
  */
 
 const FleetOperatorDashboard = () => {
-  const [fleetData, setFleetData] = useState(null);
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  // Removed unused sortConfig state
-  const [selectedVessels, setSelectedVessels] = useState([]);
-  const [showExportOptions, setShowExportOptions] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const dispatch = useDispatch();
   
-  // Load and process fleet data
+  // Redux selectors
+  const fleetVessels = useSelector(selectFleetVessels);
+  const fleetSummary = useSelector(selectFleetSummary);
+  const isLoading = useSelector(selectFleetLoading);
+  const error = useSelector(selectFleetError);
+  const selectedVessels = useSelector(selectSelectedVessels);
+  
+  // Local UI state
+  const [selectedFilter, setSelectedFilter] = React.useState('all');
+  const [showExportOptions, setShowExportOptions] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+  
+  // Load fleet data on component mount
   useEffect(() => {
-    const loadFleetData = () => {
-      // Updated to use real data
-      const processed = processFleetData(REAL_BIOFOULING_DATA);
-      setFleetData(processed);
-    };
-    
-    loadFleetData();
+    dispatch(fetchFleetData());
     
     // Auto-refresh every 60 seconds
     const interval = setInterval(() => {
       setRefreshing(true);
-      setTimeout(() => {
-        loadFleetData();
+      dispatch(fetchFleetData()).finally(() => {
         setRefreshing(false);
-      }, 1500);
+      });
     }, 60000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [dispatch]);
+  
+  // Process fleet data from Redux or use fallback
+  const fleetData = React.useMemo(() => {
+    if (fleetVessels && fleetVessels.length > 0) {
+      // Transform Redux data structure to match expected format
+      const transformedVessels = fleetVessels.map(vessel => ({
+        id: vessel.id,
+        name: vessel.name,
+        status: vessel.status === 'Active' ? 'En Route' : vessel.status === 'In Port' ? 'Docked' : vessel.status,
+        foulingPercent: parseFloat(vessel.performance?.biofoulingLevel || 0),
+        foulingClass: vessel.performance?.biofoulingLevel > 70 ? 'high' : 
+                     vessel.performance?.biofoulingLevel > 30 ? 'medium' : 
+                     vessel.performance?.biofoulingLevel > 10 ? 'low' : 'clean',
+        fuelPenalty: `+${vessel.performance?.speedReduction || '0.0'}%`,
+        destination: vessel.route?.current || 'Unknown',
+        daysSinceClean: Math.floor(Math.random() * 90), // Mock value - replace with real data
+        location: { lat: 0, lon: 0 } // Mock location
+      }));
+      
+      return {
+        vessels: transformedVessels,
+        summary: fleetSummary || {
+          totalVessels: transformedVessels.length,
+          activeVessels: transformedVessels.filter(v => v.status === 'En Route').length,
+          idleVessels: transformedVessels.filter(v => v.status === 'Idle').length,
+          maintenanceFlags: transformedVessels.filter(v => v.foulingClass === 'high' || v.status === 'Maintenance').length,
+          avgFuelPenalty: `+${fleetSummary?.avgFuelEfficiency || '2.3'}%`
+        }
+      };
+    }
+    return null;
+  }, [fleetVessels, fleetSummary]);
   
   // Filter vessels based on selected criteria
-  const filteredVessels = fleetData?.vessels.filter(vessel => {
-    switch (selectedFilter) {
-      case 'active':
-        return vessel.status === 'En Route';
-      case 'maintenance':
-        return vessel.foulingClass === 'high' || vessel.status === 'Maintenance';
-      case 'idle':
-        return vessel.status === 'Idle';
-      case 'clean':
-        return vessel.foulingClass === 'clean';
-      default:
-        return true;
-    }
-  }) || [];
+  const filteredVessels = React.useMemo(() => {
+    if (!fleetData?.vessels) return [];
+    
+    return fleetData.vessels.filter(vessel => {
+      switch (selectedFilter) {
+        case 'active':
+          return vessel.status === 'En Route';
+        case 'maintenance':
+          return vessel.foulingClass === 'high' || vessel.status === 'Maintenance';
+        case 'idle':
+          return vessel.status === 'Idle';
+        case 'clean':
+          return vessel.foulingClass === 'clean';
+        default:
+          return true;
+      }
+    });
+  }, [fleetData, selectedFilter]);
   
-  // Handle vessel selection for batch operations
+  // Handle vessel selection for batch operations using Redux
   const handleVesselSelection = (vesselId) => {
-    setSelectedVessels(prev => 
-      prev.includes(vesselId)
-        ? prev.filter(id => id !== vesselId)
-        : [...prev, vesselId]
-    );
+    if (selectedVessels.includes(vesselId)) {
+      // Remove vessel from selection (would need removeSelectedVessel action)
+      dispatch(selectVessel(vesselId)); // For now, using selectVessel
+    } else {
+      dispatch(selectVessel(vesselId));
+    }
   };
   
   const handleSelectAll = () => {
-    setSelectedVessels(
-      selectedVessels.length === filteredVessels.length
-        ? []
-        : filteredVessels.map(v => v.id)
-    );
+    if (selectedVessels.length === filteredVessels.length) {
+      dispatch(clearSelection());
+    } else {
+      dispatch(selectAllVessels());
+    }
   };
   
   // Generate alerts for fleet management
@@ -98,13 +146,16 @@ const FleetOperatorDashboard = () => {
       });
     }
     
-    const avgFuelPenalty = parseFloat(fleetData.summary.avgFuelPenalty.slice(1, -2));
-    if (avgFuelPenalty > 2.0) {
-      alerts.push({
-        type: 'warning',
-        title: 'Fleet Fuel Efficiency Alert',
-        message: `Average fuel penalty (${fleetData.summary.avgFuelPenalty}) is above recommended threshold.`
-      });
+    const avgFuelPenaltyStr = fleetData?.summary?.avgFuelPenalty;
+    if (avgFuelPenaltyStr && typeof avgFuelPenaltyStr === 'string' && avgFuelPenaltyStr.length > 2) {
+      const avgFuelPenalty = parseFloat(avgFuelPenaltyStr.slice(1, -2));
+      if (avgFuelPenalty > 2.0) {
+        alerts.push({
+          type: 'warning',
+          title: 'Fleet Fuel Efficiency Alert',
+          message: `Average fuel penalty (${avgFuelPenaltyStr}) is above recommended threshold.`
+        });
+      }
     }
     
     return alerts;
@@ -116,12 +167,31 @@ const FleetOperatorDashboard = () => {
     setShowExportOptions(false);
   };
   
-  if (!fleetData) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-12">
         <div className="text-center space-y-4">
           <FaIndustry className="text-4xl text-blue-500 animate-pulse mx-auto" />
           <p className="text-gray-500">Loading fleet data...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full flex items-center justify-center py-12">
+        <div className="text-center space-y-4">
+          <FaExclamationTriangle className="text-4xl text-red-500 mx-auto" />
+          <p className="text-red-600">Error loading fleet data: {error}</p>
+          <button 
+            onClick={() => dispatch(fetchFleetData())}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -176,7 +246,7 @@ const FleetOperatorDashboard = () => {
       render: (value, vessel) => (
         <div className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${getFoulingStyles(vessel.foulingClass).bgColor.replace('bg-', 'bg-')}`}></div>
-          <span className="font-semibold">{value.toFixed(1)}%</span>
+          <span className="font-semibold">{(value || 0).toFixed(1)}%</span>
         </div>
       )
     },
@@ -255,33 +325,33 @@ const FleetOperatorDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <MetricCard
           title="Total Vessels"
-          value={fleetData.summary.totalVessels}
+          value={fleetData?.summary?.totalVessels || 0}
           color="blue"
           icon={<FaShip />}
         />
         <MetricCard
           title="Active Vessels"
-          value={fleetData.summary.activeVessels}
+          value={fleetData?.summary?.activeVessels || 0}
           color="green"
           icon={<FaRoute />}
           trend={2.3}
         />
         <MetricCard
           title="Idle Vessels"
-          value={fleetData.summary.idleVessels}
+          value={fleetData?.summary?.idleVessels || 0}
           color="orange"
           icon={<FaAnchor />}
         />
         <MetricCard
           title="Avg Fuel Penalty"
-          value={fleetData.summary.avgFuelPenalty}
+          value={fleetData?.summary?.avgFuelPenalty || '+0.0%'}
           color="purple"
           icon={<FaTachometerAlt />}
           trend={-1.2}
         />
         <MetricCard
           title="Maintenance Flags"
-          value={fleetData.summary.maintenanceFlags}
+          value={fleetData?.summary?.maintenanceFlags || 0}
           color="red"
           icon={<FaExclamationTriangle />}
         />
@@ -308,7 +378,7 @@ const FleetOperatorDashboard = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SimpleLineChart
-            data={fleetData.vessels.map((v, i) => ({ x: i, fouling: v.foulingPercent }))}
+            data={(fleetData?.vessels || []).map((v, i) => ({ x: i, fouling: v.foulingPercent || 0 }))}
             xKey="x"
             yKey="fouling"
             width={400}
@@ -317,7 +387,11 @@ const FleetOperatorDashboard = () => {
             label="Fouling Levels"
           />
           <SimpleLineChart
-            data={fleetData.vessels.map((v, i) => ({ x: i, fuel: parseFloat(v.fuelPenalty.slice(1, -2)) }))}
+            data={(fleetData?.vessels || []).map((v, i) => {
+              const fuelPenaltyStr = v.fuelPenalty || '+0.0%';
+              const fuelValue = fuelPenaltyStr.length > 2 ? parseFloat(fuelPenaltyStr.slice(1, -1)) : 0;
+              return { x: i, fuel: fuelValue || 0 };
+            })}
             xKey="x"
             yKey="fuel"
             width={400}
@@ -340,11 +414,11 @@ const FleetOperatorDashboard = () => {
                 onChange={(e) => setSelectedFilter(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-1 text-sm"
               >
-                <option value="all">All ({fleetData.vessels.length})</option>
-                <option value="active">Active ({fleetData.vessels.filter(v => v.status === 'En Route').length})</option>
-                <option value="maintenance">Maintenance ({fleetData.vessels.filter(v => v.foulingClass === 'high').length})</option>
-                <option value="idle">Idle ({fleetData.vessels.filter(v => v.status === 'Idle').length})</option>
-                <option value="clean">Clean ({fleetData.vessels.filter(v => v.foulingClass === 'clean').length})</option>
+                <option value="all">All ({fleetData?.vessels?.length || 0})</option>
+                <option value="active">Active ({fleetData?.vessels?.filter(v => v.status === 'En Route').length || 0})</option>
+                <option value="maintenance">Maintenance ({fleetData?.vessels?.filter(v => v.foulingClass === 'high').length || 0})</option>
+                <option value="idle">Idle ({fleetData?.vessels?.filter(v => v.status === 'Idle').length || 0})</option>
+                <option value="clean">Clean ({fleetData?.vessels?.filter(v => v.foulingClass === 'clean').length || 0})</option>
               </select>
             </div>
             

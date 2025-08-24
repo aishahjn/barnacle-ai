@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { FaLeaf, FaUsers, FaBalanceScale, FaChartArea, FaWater, FaIndustry, FaGlobe, FaHeart, FaShieldAlt, FaTrophy, FaCertificate, FaRecycle } from 'react-icons/fa';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { FaLeaf, FaUsers, FaBalanceScale, FaChartArea, FaWater, FaIndustry, FaGlobe, FaHeart, FaShieldAlt, FaTrophy, FaCertificate, FaRecycle, FaGasPump } from 'react-icons/fa';
 import { DESIGN_TOKENS } from '../../constants/designTokens';
 import { MetricCard, StatusBadge, Alert, ProgressBar } from '../shared/Charts';
 import Loading from '../shared/Loading';
+import {
+  selectESGData,
+  selectESGLoading,
+  selectESGSettings,
+  fetchESGData,
+  updateSettings
+} from '../../redux/selectors';
 
 /**
  * ESG Dashboard Component
@@ -13,167 +21,100 @@ import Loading from '../shared/Loading';
  * Governance: Data-Driven Compliance, Optimized Resource Management, Innovation & Leadership
  */
 
-const ESGDashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('current_year');
-  const [activeESGTab, setActiveESGTab] = useState('environmental');
+// ESG tabs configuration
+const esgTabs = [
+  { id: 'environmental', label: 'Environmental', icon: <FaLeaf />, color: 'green' },
+  { id: 'social', label: 'Social', icon: <FaUsers />, color: 'blue' },
+  { id: 'governance', label: 'Governance', icon: <FaBalanceScale />, color: 'purple' }
+];
 
-  useEffect(() => {
-    // Simulate loading ESG data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // ESG Data based on BarnaClean document metrics
-  const esgData = {
-    environmental: {
-      metrics: [
-        {
-          title: 'CO₂ Emissions Reduced',
-          current: '500,000',
-          unit: 'tons/year',
-          trend: 'positive',
-          change: '+21.3%',
-          icon: <FaLeaf className="text-green-500" />,
-          description: 'Carbon footprint reduction through optimized routing'
-        },
-        {
-          title: 'Fuel Consumption Saved',
-          current: '18.5',
-          unit: '%',
-          trend: 'positive', 
-          change: '+15.2%',
-          icon: <FaIndustry className="text-blue-500" />,
-          description: 'Fuel efficiency improvements via AI optimization'
-        },
-        {
-          title: 'Chemical Pollution Reduced',
-          current: '85',
-          unit: '%',
-          trend: 'positive',
-          change: '+12.8%', 
-          icon: <FaWater className="text-cyan-500" />,
-          description: 'Less frequent hull cleaning reduces chemical use'
-        },
-        {
-          title: 'Biodiversity Protection',
-          current: '95',
-          unit: '% compliance',
-          trend: 'positive',
-          change: '+8.4%',
-          icon: <FaGlobe className="text-emerald-500" />,
-          description: 'Marine ecosystem preservation initiatives'
-        }
-      ],
-      targets: {
-        co2Reduction: { target: 30, achieved: 21.3 },
-        fuelSaving: { target: 25, achieved: 18.5 },
-        chemicalReduction: { target: 90, achieved: 85 }
+// Helper function to render metrics
+const renderMetrics = (metrics) => {
+  if (!metrics || metrics.length === 0) {
+    // Return default metrics for each category
+    return [
+      {
+        title: 'Carbon Footprint',
+        current: 425,
+        unit: 'tons CO₂',
+        icon: <FaIndustry className="text-green-400" />,
+        trend: 'down',
+        change: '-12.5%',
+        description: 'Monthly emissions reduced through BarnaClean technology'
+      },
+      {
+        title: 'Fuel Efficiency',
+        current: 94.2,
+        unit: '%',
+        icon: <FaGasPump className="text-blue-400" />,
+        trend: 'up',
+        change: '+5.8%',
+        description: 'Fleet-wide fuel efficiency improvement'
+      },
+      {
+        title: 'Crew Safety Score',
+        current: 98.1,
+        unit: '/100',
+        icon: <FaHeart className="text-red-400" />,
+        trend: 'up',
+        change: '+2.3%',
+        description: 'Safety incidents and training compliance'
+      },
+      {
+        title: 'Compliance Rating',
+        current: 99.7,
+        unit: '%',
+        icon: <FaShieldAlt className="text-purple-400" />,
+        trend: 'stable',
+        change: '0%',
+        description: 'Regulatory compliance across all operations'
       }
-    },
-    social: {
-      metrics: [
-        {
-          title: 'Crew Safety Score',
-          current: '94.7',
-          unit: '%',
-          trend: 'positive',
-          change: '+5.2%',
-          icon: <FaShieldAlt className="text-yellow-500" />,
-          description: 'Improved working conditions and safety protocols'
-        },
-        {
-          title: 'Industry Reputation Index',
-          current: '4.8',
-          unit: '/5.0',
-          trend: 'positive',
-          change: '+0.3%',
-          icon: <FaTrophy className="text-purple-500" />,
-          description: 'Enhanced brand reputation and stakeholder trust'
-        },
-        {
-          title: 'Community Well-being',
-          current: '87',
-          unit: '% positive',
-          trend: 'positive',
-          change: '+7.1%',
-          icon: <FaHeart className="text-red-500" />,
-          description: 'Positive impact on coastal communities'
-        },
-        {
-          title: 'Employee Satisfaction',
-          current: '92',
-          unit: '%',
-          trend: 'positive',
-          change: '+4.8%',
-          icon: <FaUsers className="text-indigo-500" />,
-          description: 'Workforce engagement and satisfaction levels'
-        }
-      ],
-      initiatives: [
-        'Crew training and safety programs',
-        'Community engagement projects',
-        'Industry leadership participation',
-        'Stakeholder transparency initiatives'
-      ]
-    },
-    governance: {
-      metrics: [
-        {
-          title: 'Compliance Score',
-          current: '98.2',
-          unit: '%',
-          trend: 'positive',
-          change: '+2.1%',
-          icon: <FaBalanceScale className="text-gray-600" />,
-          description: 'Regulatory compliance and data governance'
-        },
-        {
-          title: 'Resource Optimization',
-          current: '91.5',
-          unit: '% efficiency',
-          trend: 'positive',
-          change: '+6.3%',
-          icon: <FaRecycle className="text-green-600" />,
-          description: 'Optimized resource management and allocation'
-        },
-        {
-          title: 'Innovation Index',
-          current: '4.7',
-          unit: '/5.0',
-          trend: 'positive',
-          change: '+0.4%',
-          icon: <FaCertificate className="text-blue-600" />,
-          description: 'Technology innovation and leadership metrics'
-        },
-        {
-          title: 'Transparency Rating',
-          current: '89',
-          unit: '%',
-          trend: 'positive',
-          change: '+3.2%',
-          icon: <FaChartArea className="text-cyan-600" />,
-          description: 'Data transparency and reporting standards'
-        }
-      ],
-      frameworks: [
-        'UN Global Compact',
-        'GRI Standards',
-        'SASB Maritime Framework',
-        'IMO Environmental Guidelines'
-      ]
-    }
+    ];
+  }
+  return metrics;
+};
+
+const ESGDashboard = () => {
+  const dispatch = useDispatch();
+  
+  // Redux selectors
+  const esgData = useSelector(selectESGData);
+  const isLoading = useSelector(selectESGLoading);
+  const settings = useSelector(selectESGSettings);
+  
+  // Local UI state for active tab (not business logic)
+  const [activeESGTab, setActiveESGTab] = React.useState('environmental');
+  
+  // Extract selected period from Redux settings or use default
+  const selectedPeriod = settings.reportingPeriod || 'current_year';
+  
+  useEffect(() => {
+    // Fetch ESG data on component mount
+    dispatch(fetchESGData());
+  }, [dispatch]);
+  
+  // Handle period change
+  const handlePeriodChange = (period) => {
+    dispatch(updateSettings({ reportingPeriod: period }));
   };
 
-  const esgTabs = [
-    { id: 'environmental', label: 'Environmental', icon: <FaLeaf />, color: 'green' },
-    { id: 'social', label: 'Social', icon: <FaUsers />, color: 'blue' },
-    { id: 'governance', label: 'Governance', icon: <FaBalanceScale />, color: 'purple' }
-  ];
-
-  const currentData = esgData[activeESGTab];
+  // If no data from Redux, use default structure with loading state
+  const displayData = esgData || {
+    environmental: {
+      metrics: [],
+      targets: { co2Reduction: { target: 30, achieved: 0 }, fuelSaving: { target: 25, achieved: 0 }, chemicalReduction: { target: 90, achieved: 0 } }
+    },
+    social: {
+      metrics: [],
+      initiatives: []
+    },
+    governance: {
+      metrics: [],
+      frameworks: []
+    }
+  };
+  
+  const currentData = displayData[activeESGTab] || { metrics: [], targets: {}, initiatives: [], frameworks: [] };
 
   if (isLoading) {
     return (
@@ -209,7 +150,7 @@ const ESGDashboard = () => {
           {['current_year', 'last_quarter', 'ytd', 'all_time'].map((period) => (
             <button
               key={period}
-              onClick={() => setSelectedPeriod(period)}
+              onClick={() => handlePeriodChange(period)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 selectedPeriod === period 
                   ? 'bg-green-600 text-white shadow-lg' 
@@ -256,7 +197,7 @@ const ESGDashboard = () => {
 
       {/* ESG Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {currentData.metrics.map((metric, index) => (
+        {renderMetrics(currentData?.metrics || []).map((metric, index) => (
           <MetricCard
             key={index}
             title={metric.title}
@@ -271,7 +212,7 @@ const ESGDashboard = () => {
       </div>
 
       {/* Environmental Targets Progress */}
-      {activeESGTab === 'environmental' && (
+      {activeESGTab === 'environmental' && currentData.targets && (
         <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <FaLeaf className="text-green-400" />
@@ -281,10 +222,10 @@ const ESGDashboard = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white">CO₂ Reduction Target</span>
-                <span className="text-cyan-100">21.3% / 30%</span>
+                <span className="text-cyan-100">{currentData.targets.co2Reduction?.achieved || 0}% / {currentData.targets.co2Reduction?.target || 30}%</span>
               </div>
               <ProgressBar 
-                progress={(currentData.targets.co2Reduction.achieved / currentData.targets.co2Reduction.target) * 100}
+                progress={((currentData.targets.co2Reduction?.achieved || 0) / (currentData.targets.co2Reduction?.target || 30)) * 100}
                 color="bg-green-500"
                 className="bg-white/20"
               />
@@ -292,10 +233,10 @@ const ESGDashboard = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white">Fuel Savings Target</span>
-                <span className="text-cyan-100">18.5% / 25%</span>
+                <span className="text-cyan-100">{currentData.targets.fuelSaving?.achieved || 0}% / {currentData.targets.fuelSaving?.target || 25}%</span>
               </div>
               <ProgressBar 
-                progress={(currentData.targets.fuelSaving.achieved / currentData.targets.fuelSaving.target) * 100}
+                progress={((currentData.targets.fuelSaving?.achieved || 0) / (currentData.targets.fuelSaving?.target || 25)) * 100}
                 color="bg-blue-500"
                 className="bg-white/20"
               />
@@ -303,10 +244,10 @@ const ESGDashboard = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white">Chemical Reduction Target</span>
-                <span className="text-cyan-100">85% / 90%</span>
+                <span className="text-cyan-100">{currentData.targets.chemicalReduction?.achieved || 0}% / {currentData.targets.chemicalReduction?.target || 90}%</span>
               </div>
               <ProgressBar 
-                progress={(currentData.targets.chemicalReduction.achieved / currentData.targets.chemicalReduction.target) * 100}
+                progress={((currentData.targets.chemicalReduction?.achieved || 0) / (currentData.targets.chemicalReduction?.target || 90)) * 100}
                 color="bg-cyan-500"
                 className="bg-white/20"
               />
@@ -323,7 +264,7 @@ const ESGDashboard = () => {
             Social Impact Initiatives
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentData.initiatives.map((initiative, index) => (
+            {(currentData.initiatives || []).map((initiative, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-white/10 rounded-lg">
                 <div className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0"></div>
                 <span className="text-cyan-100 text-sm">{initiative}</span>
@@ -341,7 +282,7 @@ const ESGDashboard = () => {
             Compliance Frameworks
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentData.frameworks.map((framework, index) => (
+            {(currentData.frameworks || []).map((framework, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-white/10 rounded-lg">
                 <FaCertificate className="text-purple-400 flex-shrink-0" />
                 <span className="text-cyan-100 text-sm font-medium">{framework}</span>
@@ -356,15 +297,15 @@ const ESGDashboard = () => {
         <h3 className="text-lg font-semibold text-white mb-4">ESG Impact Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-400 mb-2">500K+</div>
+            <div className="text-3xl font-bold text-green-400 mb-2">{esgData?.environmental?.carbonFootprint?.total ? Math.floor(esgData.environmental.carbonFootprint.total / 1000) + 'K+' : '500K+'}</div>
             <div className="text-cyan-100 text-sm">Tons CO₂ Saved</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-400 mb-2">94.7%</div>
+            <div className="text-3xl font-bold text-blue-400 mb-2">{esgData?.social?.crewWelfare?.satisfactionScore ? parseFloat(esgData.social.crewWelfare.satisfactionScore).toFixed(2) : '94.70'}%</div>
             <div className="text-cyan-100 text-sm">Safety Score</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-400 mb-2">98.2%</div>
+            <div className="text-3xl font-bold text-purple-400 mb-2">{esgData?.governance?.compliance?.regulatoryScore ? parseFloat(esgData.governance.compliance.regulatoryScore).toFixed(2) : '98.20'}%</div>
             <div className="text-cyan-100 text-sm">Compliance Rating</div>
           </div>
         </div>

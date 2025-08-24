@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FaWind, FaWater, FaShip, FaSatelliteDish, FaThermometerHalf, FaCompass, FaTachometerAlt, FaMapMarkerAlt, FaBroadcastTower, FaEye } from 'react-icons/fa';
 import { DESIGN_TOKENS } from '../../constants/designTokens';
 import { MetricCard, StatusBadge, Alert, ProgressBar } from '../shared/Charts';
 import Loading from '../shared/Loading';
+import {
+  selectAISData,
+  selectWeatherData,
+  selectOceanCurrentsData,
+  selectEnvironmentalData,
+  selectMarineDataLoading,
+  selectConnectionStatus,
+  fetchAllMarineData
+} from '../../redux/selectors';
 
 /**
  * Real-Time Data Dashboard Component
@@ -14,125 +24,64 @@ import Loading from '../shared/Loading';
  */
 
 const RealTimeDataDashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedDataSource, setSelectedDataSource] = useState('ais');
-  const [liveData, setLiveData] = useState(null);
-  const [connectionStatus] = useState('connected');
-
+  const dispatch = useDispatch();
+  
+  // Redux selectors
+  const aisData = useSelector(selectAISData);
+  const weatherData = useSelector(selectWeatherData);
+  const oceanCurrentsData = useSelector(selectOceanCurrentsData);
+  const environmentalData = useSelector(selectEnvironmentalData);
+  const isLoading = useSelector(selectMarineDataLoading);
+  const connectionStatus = useSelector(selectConnectionStatus) || 'connected';
+  
+  // Local UI state for selected data source
+  const [selectedDataSource, setSelectedDataSource] = React.useState('ais');
+  
   useEffect(() => {
-    // Simulate loading real-time data connections
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setLiveData(generateMockData());
-    }, 1500);
+    // Fetch marine data on component mount
+    dispatch(fetchAllMarineData());
     
-    // Simulate periodic data updates
+    // Set up periodic data updates
     const updateInterval = setInterval(() => {
-      if (!isLoading) {
-        setLiveData(generateMockData());
-      }
-    }, 5000);
+      dispatch(fetchAllMarineData());
+    }, 30000); // Update every 30 seconds
 
     return () => {
-      clearTimeout(timer);
       clearInterval(updateInterval);
     };
-  }, [isLoading]);
+  }, [dispatch]);
 
-  // Generate mock real-time data
-  const generateMockData = () => {
-    const timestamp = new Date().toLocaleTimeString();
-    
-    return {
-      ais: {
-        activeVessels: Math.floor(Math.random() * 50) + 150,
-        vesselData: [
-          {
-            id: 'IMO9234567',
-            name: 'MV Pacific Star',
-            lat: 1.2966 + (Math.random() - 0.5) * 0.1,
-            lng: 103.8522 + (Math.random() - 0.5) * 0.1,
-            speed: (12.5 + (Math.random() - 0.5) * 2).toFixed(1),
-            course: Math.floor(Math.random() * 360),
-            status: 'Under way using engine',
-            lastUpdate: timestamp
-          },
-          {
-            id: 'IMO9345678',
-            name: 'MV Atlantic Dawn', 
-            lat: 51.8985 + (Math.random() - 0.5) * 0.1,
-            lng: 4.4844 + (Math.random() - 0.5) * 0.1,
-            speed: (8.2 + (Math.random() - 0.5) * 2).toFixed(1),
-            course: Math.floor(Math.random() * 360),
-            status: 'At anchor',
-            lastUpdate: timestamp
-          }
-        ],
-        totalMessages: Math.floor(Math.random() * 1000) + 5000,
-        avgUpdateRate: '30s'
+  // Process Redux data with fallbacks for display
+  const processedData = {
+    ais: {
+      activeVessels: aisData?.activeVessels || 0,
+      vesselData: aisData?.vesselData || [],
+      totalMessages: aisData?.totalMessages || 0,
+      avgUpdateRate: aisData?.avgUpdateRate || '30s'
+    },
+    weather: {
+      conditions: weatherData?.conditions || [],
+      lastUpdate: weatherData?.lastUpdate || new Date().toLocaleTimeString(),
+      forecastAccuracy: weatherData?.forecastAccuracy || '94.2%'
+    },
+    oceanCurrents: {
+      currents: oceanCurrentsData?.currents || [],
+      modelResolution: oceanCurrentsData?.modelResolution || '1/12°',
+      updateFrequency: oceanCurrentsData?.updateFrequency || '3 hours',
+      lastUpdate: oceanCurrentsData?.lastUpdate || new Date().toLocaleTimeString()
+    },
+    environmental: {
+      biofoulingFactors: {
+        seaTemperature: environmentalData?.biofoulingFactors?.seaTemperature || '25.0',
+        salinity: environmentalData?.biofoulingFactors?.salinity || '34.8',
+        dissolvedOxygen: environmentalData?.biofoulingFactors?.dissolvedOxygen || '7.2',
+        turbidity: environmentalData?.biofoulingFactors?.turbidity || '12.5',
+        phLevel: environmentalData?.biofoulingFactors?.phLevel || '8.10'
       },
-      weather: {
-        conditions: [
-          {
-            location: 'Singapore Strait',
-            windSpeed: (15.2 + (Math.random() - 0.5) * 5).toFixed(1),
-            windDirection: Math.floor(Math.random() * 360),
-            waveHeight: (1.8 + Math.random() * 1.5).toFixed(1),
-            visibility: (8.5 + Math.random() * 1.5).toFixed(1),
-            temperature: (28.5 + (Math.random() - 0.5) * 3).toFixed(1),
-            humidity: Math.floor(Math.random() * 20) + 70,
-            pressure: (1013 + (Math.random() - 0.5) * 10).toFixed(1)
-          },
-          {
-            location: 'North Sea',
-            windSpeed: (22.8 + (Math.random() - 0.5) * 8).toFixed(1),
-            windDirection: Math.floor(Math.random() * 360),
-            waveHeight: (2.5 + Math.random() * 2).toFixed(1),
-            visibility: (6.2 + Math.random() * 3).toFixed(1),
-            temperature: (12.1 + (Math.random() - 0.5) * 4).toFixed(1),
-            humidity: Math.floor(Math.random() * 15) + 80,
-            pressure: (1008 + (Math.random() - 0.5) * 15).toFixed(1)
-          }
-        ],
-        lastUpdate: timestamp,
-        forecastAccuracy: '94.2%'
-      },
-      oceanCurrents: {
-        currents: [
-          {
-            region: 'Malacca Strait',
-            speed: (0.8 + Math.random() * 1.2).toFixed(2),
-            direction: Math.floor(Math.random() * 360),
-            temperature: (29.2 + (Math.random() - 0.5) * 2).toFixed(1),
-            salinity: (34.1 + (Math.random() - 0.5) * 1).toFixed(1),
-            depth: '0-50m'
-          },
-          {
-            region: 'English Channel',
-            speed: (1.2 + Math.random() * 1.5).toFixed(2),
-            direction: Math.floor(Math.random() * 360),
-            temperature: (14.8 + (Math.random() - 0.5) * 2).toFixed(1),
-            salinity: (35.2 + (Math.random() - 0.5) * 0.8).toFixed(1),
-            depth: '0-50m'
-          }
-        ],
-        modelResolution: '1/12°',
-        updateFrequency: '3 hours',
-        lastUpdate: timestamp
-      },
-      environmental: {
-        biofoulingFactors: {
-          seaTemperature: (25.8 + (Math.random() - 0.5) * 4).toFixed(1),
-          salinity: (34.8 + (Math.random() - 0.5) * 1.5).toFixed(1),
-          dissolvedOxygen: (7.2 + Math.random() * 1.5).toFixed(1),
-          turbidity: (12.5 + Math.random() * 8).toFixed(1),
-          phLevel: (8.1 + (Math.random() - 0.5) * 0.3).toFixed(2)
-        },
-        growthRisk: Math.random() > 0.5 ? 'moderate' : 'low',
-        riskFactors: ['Optimal temperature range', 'High salinity levels'],
-        lastAssessment: timestamp
-      }
-    };
+      growthRisk: environmentalData?.growthRisk || 'low',
+      riskFactors: environmentalData?.riskFactors || [],
+      lastAssessment: environmentalData?.lastAssessment || new Date().toLocaleTimeString()
+    }
   };
 
   const dataSources = [
@@ -175,11 +124,16 @@ const RealTimeDataDashboard = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <StatusBadge 
-              status={connectionStatus} 
-              text={connectionStatus === 'connected' ? 'All Systems Online' : 'Connection Issues'}
+              status={typeof connectionStatus === 'object' ? connectionStatus?.status || 'connected' : connectionStatus}
             />
+            <span className="text-white text-sm font-medium">
+              {typeof connectionStatus === 'object' 
+                ? (connectionStatus?.status === 'connected' ? 'All Systems Online' : 'Connection Issues')
+                : (connectionStatus === 'connected' ? 'All Systems Online' : 'Connection Issues')
+              }
+            </span>
             <span className="text-cyan-100 text-sm">
-              Last updated: {liveData?.ais?.vesselData[0]?.lastUpdate}
+              Last updated: {processedData.ais.vesselData?.length > 0 ? processedData.ais.vesselData[0]?.lastUpdate : new Date().toLocaleTimeString()}
             </span>
           </div>
           <div className="flex items-center gap-2 text-cyan-100 text-sm">
@@ -215,32 +169,32 @@ const RealTimeDataDashboard = () => {
       </div>
 
       {/* AIS Data Display */}
-      {selectedDataSource === 'ais' && liveData?.ais && (
+      {selectedDataSource === 'ais' && processedData.ais && (
         <div className="space-y-4">
           <Alert
             type="info"
             title="AIS Network Status"
-            message={`Tracking ${liveData.ais.activeVessels} active vessels with ${liveData.ais.totalMessages} messages processed`}
+            message={`Tracking ${processedData.ais.activeVessels} active vessels with ${processedData.ais.totalMessages} messages processed`}
           />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <MetricCard
               title="Active Vessels"
-              value={liveData.ais.activeVessels.toString()}
+              value={processedData.ais.activeVessels.toString()}
               icon={<FaShip className="text-blue-400" />}
               trend="positive"
               className="bg-white/10 border-white/20"
             />
             <MetricCard
               title="Messages/Hour"
-              value={liveData.ais.totalMessages.toString()}
+              value={processedData.ais.totalMessages.toString()}
               icon={<FaSatelliteDish className="text-green-400" />}
               trend="positive"
               className="bg-white/10 border-white/20"
             />
             <MetricCard
               title="Update Rate"
-              value={liveData.ais.avgUpdateRate}
+              value={processedData.ais.avgUpdateRate}
               icon={<FaBroadcastTower className="text-cyan-400" />}
               className="bg-white/10 border-white/20"
             />
@@ -249,159 +203,180 @@ const RealTimeDataDashboard = () => {
           <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
             <h3 className="text-lg font-semibold text-white mb-4">Live Vessel Tracking</h3>
             <div className="space-y-4">
-              {liveData.ais.vesselData.map((vessel) => (
-                <div key={vessel.id} className="bg-white/10 rounded-lg p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <h4 className="font-semibold text-white">{vessel.name}</h4>
-                      <p className="text-cyan-200 text-sm">{vessel.id}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FaMapMarkerAlt className="text-red-400" />
+              {processedData.ais.vesselData && processedData.ais.vesselData.length > 0 ? (
+                processedData.ais.vesselData.map((vessel) => (
+                  <div key={vessel.id} className="bg-white/10 rounded-lg p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
-                        <div className="text-white text-sm">{vessel.lat.toFixed(4)}°, {vessel.lng.toFixed(4)}°</div>
-                        <div className="text-cyan-200 text-xs">{vessel.status}</div>
+                        <h4 className="font-semibold text-white">{vessel.name}</h4>
+                        <p className="text-cyan-200 text-sm">{vessel.id}</p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FaTachometerAlt className="text-yellow-400" />
-                      <div>
-                        <div className="text-white text-sm">{vessel.speed} knots</div>
-                        <div className="text-cyan-200 text-xs">Course: {vessel.course}°</div>
+                      <div className="flex items-center gap-2">
+                        <FaMapMarkerAlt className="text-red-400" />
+                        <div>
+                          <div className="text-white text-sm">{vessel.lat?.toFixed(4)}°, {vessel.lng?.toFixed(4)}°</div>
+                          <div className="text-cyan-200 text-xs">{vessel.status}</div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FaEye className="text-green-400" />
-                      <div>
-                        <div className="text-white text-sm">Live</div>
-                        <div className="text-cyan-200 text-xs">{vessel.lastUpdate}</div>
+                      <div className="flex items-center gap-2">
+                        <FaTachometerAlt className="text-yellow-400" />
+                        <div>
+                          <div className="text-white text-sm">{vessel.speed} knots</div>
+                          <div className="text-cyan-200 text-xs">Course: {vessel.course}°</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FaEye className="text-green-400" />
+                        <div>
+                          <div className="text-white text-sm">Live</div>
+                          <div className="text-cyan-200 text-xs">{vessel.lastUpdate}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center text-cyan-200 py-8">
+                  <FaSatelliteDish className="text-4xl mx-auto mb-2 opacity-50" />
+                  <p>No vessel data available. Connecting to AIS network...</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* Weather Data Display */}
-      {selectedDataSource === 'weather' && liveData?.weather && (
+      {selectedDataSource === 'weather' && processedData.weather && (
         <div className="space-y-4">
           <Alert
             type="success"
             title="Weather Data Active"
-            message={`Marine weather monitoring with ${liveData.weather.forecastAccuracy} forecast accuracy`}
+            message={`Marine weather monitoring with ${processedData.weather.forecastAccuracy} forecast accuracy`}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {liveData.weather.conditions.map((condition, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
-                <h3 className="text-lg font-semibold text-white mb-4">{condition.location}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <MetricCard
-                    title="Wind Speed"
-                    value={`${condition.windSpeed} kts`}
-                    icon={<FaWind className="text-green-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                  <MetricCard
-                    title="Wave Height"
-                    value={`${condition.waveHeight} m`}
-                    icon={<FaWater className="text-blue-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                  <MetricCard
-                    title="Temperature"
-                    value={`${condition.temperature}°C`}
-                    icon={<FaThermometerHalf className="text-orange-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                  <MetricCard
-                    title="Visibility"
-                    value={`${condition.visibility} nm`}
-                    icon={<FaEye className="text-cyan-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
+            {processedData.weather.conditions && processedData.weather.conditions.length > 0 ? (
+              processedData.weather.conditions.map((condition, index) => (
+                <div key={index} className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+                  <h3 className="text-lg font-semibold text-white mb-4">{condition.location}</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <MetricCard
+                      title="Wind Speed"
+                      value={`${condition.windSpeed} kts`}
+                      icon={<FaWind className="text-green-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                    <MetricCard
+                      title="Wave Height"
+                      value={`${condition.waveHeight} m`}
+                      icon={<FaWater className="text-blue-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                    <MetricCard
+                      title="Temperature"
+                      value={`${condition.temperature}°C`}
+                      icon={<FaThermometerHalf className="text-orange-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                    <MetricCard
+                      title="Visibility"
+                      value={`${condition.visibility} nm`}
+                      icon={<FaEye className="text-cyan-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cyan-200">Wind Direction:</span>
+                      <span className="text-white">{condition.windDirection}°</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cyan-200">Humidity:</span>
+                      <span className="text-white">{condition.humidity}%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cyan-200">Pressure:</span>
+                      <span className="text-white">{condition.pressure} hPa</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-cyan-200">Wind Direction:</span>
-                    <span className="text-white">{condition.windDirection}°</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-cyan-200">Humidity:</span>
-                    <span className="text-white">{condition.humidity}%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-cyan-200">Pressure:</span>
-                    <span className="text-white">{condition.pressure} hPa</span>
-                  </div>
-                </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center text-cyan-200 py-8">
+                <FaWind className="text-4xl mx-auto mb-2 opacity-50" />
+                <p>No weather data available. Connecting to meteorological services...</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
 
       {/* Ocean Currents Display */}
-      {selectedDataSource === 'oceanCurrents' && liveData?.oceanCurrents && (
+      {selectedDataSource === 'oceanCurrents' && processedData.oceanCurrents && (
         <div className="space-y-4">
           <Alert
             type="info"
             title="Ocean Current Model Active"
-            message={`High-resolution current data at ${liveData.oceanCurrents.modelResolution} resolution, updated every ${liveData.oceanCurrents.updateFrequency}`}
+            message={`High-resolution current data at ${processedData.oceanCurrents.modelResolution} resolution, updated every ${processedData.oceanCurrents.updateFrequency}`}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {liveData.oceanCurrents.currents.map((current, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
-                <h3 className="text-lg font-semibold text-white mb-4">{current.region}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <MetricCard
-                    title="Current Speed"
-                    value={`${current.speed} m/s`}
-                    icon={<FaWater className="text-cyan-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                  <MetricCard
-                    title="Direction"
-                    value={`${current.direction}°`}
-                    icon={<FaCompass className="text-purple-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                  <MetricCard
-                    title="Sea Temperature"
-                    value={`${current.temperature}°C`}
-                    icon={<FaThermometerHalf className="text-red-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                  <MetricCard
-                    title="Salinity"
-                    value={`${current.salinity} PSU`}
-                    icon={<FaWater className="text-blue-400" />}
-                    className="bg-white/10 border-white/20"
-                  />
-                </div>
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-cyan-200">Depth Range:</span>
-                    <span className="text-white">{current.depth}</span>
+            {processedData.oceanCurrents.currents && processedData.oceanCurrents.currents.length > 0 ? (
+              processedData.oceanCurrents.currents.map((current, index) => (
+                <div key={index} className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+                  <h3 className="text-lg font-semibold text-white mb-4">{current.region}</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <MetricCard
+                      title="Current Speed"
+                      value={`${current.speed} m/s`}
+                      icon={<FaWater className="text-cyan-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                    <MetricCard
+                      title="Direction"
+                      value={`${current.direction}°`}
+                      icon={<FaCompass className="text-purple-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                    <MetricCard
+                      title="Sea Temperature"
+                      value={`${current.temperature}°C`}
+                      icon={<FaThermometerHalf className="text-red-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                    <MetricCard
+                      title="Salinity"
+                      value={`${current.salinity} PSU`}
+                      icon={<FaWater className="text-blue-400" />}
+                      className="bg-white/10 border-white/20"
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cyan-200">Depth Range:</span>
+                      <span className="text-white">{current.depth}</span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-2 text-center text-cyan-200 py-8">
+                <FaWater className="text-4xl mx-auto mb-2 opacity-50" />
+                <p>No ocean current data available. Connecting to oceanographic models...</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
 
       {/* Environmental Factors Display */}
-      {selectedDataSource === 'environmental' && liveData?.environmental && (
+      {selectedDataSource === 'environmental' && processedData.environmental && (
         <div className="space-y-4">
           <Alert
-            type={liveData.environmental.growthRisk === 'high' ? 'warning' : 'success'}
-            title={`Biofouling Risk: ${liveData.environmental.growthRisk.toUpperCase()}`}
-            message={`Current environmental conditions present ${liveData.environmental.growthRisk} risk for barnacle growth`}
+            type={processedData.environmental.growthRisk === 'high' ? 'warning' : 'success'}
+            title={`Biofouling Risk: ${processedData.environmental.growthRisk.toUpperCase()}`}
+            message={`Current environmental conditions present ${processedData.environmental.growthRisk} risk for barnacle growth`}
           />
 
           <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
@@ -409,33 +384,33 @@ const RealTimeDataDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <MetricCard
                 title="Sea Temperature"
-                value={`${liveData.environmental.biofoulingFactors.seaTemperature}°C`}
+                value={`${processedData.environmental.biofoulingFactors.seaTemperature}°C`}
                 icon={<FaThermometerHalf className="text-red-400" />}
-                trend={parseFloat(liveData.environmental.biofoulingFactors.seaTemperature) > 25 ? 'warning' : 'positive'}
+                trend={parseFloat(processedData.environmental.biofoulingFactors.seaTemperature) > 25 ? 'warning' : 'positive'}
                 className="bg-white/10 border-white/20"
               />
               <MetricCard
                 title="Salinity"
-                value={`${liveData.environmental.biofoulingFactors.salinity} PSU`}
-                icon={<FaWaves className="text-blue-400" />}
-                trend={parseFloat(liveData.environmental.biofoulingFactors.salinity) > 34 ? 'warning' : 'positive'}
+                value={`${processedData.environmental.biofoulingFactors.salinity} PSU`}
+                icon={<FaWater className="text-blue-400" />}
+                trend={parseFloat(processedData.environmental.biofoulingFactors.salinity) > 34 ? 'warning' : 'positive'}
                 className="bg-white/10 border-white/20"
               />
               <MetricCard
                 title="Dissolved O₂"
-                value={`${liveData.environmental.biofoulingFactors.dissolvedOxygen} mg/L`}
+                value={`${processedData.environmental.biofoulingFactors.dissolvedOxygen} mg/L`}
                 icon={<FaWind className="text-green-400" />}
                 className="bg-white/10 border-white/20"
               />
               <MetricCard
                 title="Turbidity"
-                value={`${liveData.environmental.biofoulingFactors.turbidity} NTU`}
+                value={`${processedData.environmental.biofoulingFactors.turbidity} NTU`}
                 icon={<FaEye className="text-yellow-400" />}
                 className="bg-white/10 border-white/20"
               />
               <MetricCard
                 title="pH Level"
-                value={liveData.environmental.biofoulingFactors.phLevel}
+                value={processedData.environmental.biofoulingFactors.phLevel}
                 icon={<FaThermometerHalf className="text-purple-400" />}
                 className="bg-white/10 border-white/20"
               />
@@ -444,12 +419,18 @@ const RealTimeDataDashboard = () => {
             <div className="mt-6">
               <h4 className="font-semibold text-white mb-2">Risk Factors</h4>
               <div className="space-y-2">
-                {liveData.environmental.riskFactors.map((factor, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                    <span className="text-cyan-100 text-sm">{factor}</span>
+                {processedData.environmental.riskFactors && processedData.environmental.riskFactors.length > 0 ? (
+                  processedData.environmental.riskFactors.map((factor, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <span className="text-cyan-100 text-sm">{factor}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-cyan-200 text-sm italic">
+                    No current risk factors detected.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

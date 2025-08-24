@@ -1,9 +1,10 @@
-import { FaShip, FaIndustry, FaCrown } from 'react-icons/fa';
+// React icons will be imported in components that use these constants
 
 export const PRICING_PLANS = {
   starter: {
     name: 'Starter',
-    icon: <FaShip className="text-2xl text-blue-500" />,
+    icon: 'FaShip',
+    iconColor: 'text-blue-500',
     description: 'Perfect for small shipping companies',
     monthlyPrice: 299,
     annualPrice: 2990,
@@ -21,7 +22,8 @@ export const PRICING_PLANS = {
   },
   professional: {
     name: 'Professional',
-    icon: <FaIndustry className="text-2xl text-green-500" />,
+    icon: 'FaIndustry',
+    iconColor: 'text-green-500',
     description: 'Ideal for medium-sized fleets',
     monthlyPrice: 799,
     annualPrice: 7990,
@@ -41,7 +43,8 @@ export const PRICING_PLANS = {
   },
   enterprise: {
     name: 'Enterprise',
-    icon: <FaCrown className="text-2xl text-purple-500" />,
+    icon: 'FaCrown',
+    iconColor: 'text-purple-500',
     description: 'For large fleet operations',
     monthlyPrice: 1999,
     annualPrice: 19990,

@@ -70,12 +70,27 @@ export const SimpleLineChart = ({
     );
   }
   
-  const maxY = Math.max(...data.map(d => d[yKey]));
-  const minY = Math.min(...data.map(d => d[yKey]));
-  const range = maxY - minY;
+  // Filter out invalid data points
+  const validData = data.filter(d => {
+    const value = d[yKey];
+    return value !== undefined && value !== null && !isNaN(value) && isFinite(value);
+  });
   
-  const points = data.map((point, index) => {
-    const x = (index / (data.length - 1)) * (width - 40) + 20;
+  if (validData.length === 0) {
+    return (
+      <div className="flex items-center justify-center bg-gray-50 rounded-lg" style={{ width, height }}>
+        <span className="text-gray-500">No valid data</span>
+      </div>
+    );
+  }
+  
+  const yValues = validData.map(d => d[yKey]);
+  const maxY = Math.max(...yValues);
+  const minY = Math.min(...yValues);
+  const range = maxY - minY || 1; // Prevent division by zero
+  
+  const points = validData.map((point, index) => {
+    const x = validData.length > 1 ? (index / (validData.length - 1)) * (width - 40) + 20 : width / 2;
     const y = height - 20 - ((point[yKey] - minY) / range) * (height - 40);
     return `${x},${y}`;
   }).join(' ');
@@ -102,8 +117,8 @@ export const SimpleLineChart = ({
         />
         
         {/* Data points */}
-        {data.map((point, index) => {
-          const x = (index / (data.length - 1)) * (width - 40) + 20;
+        {validData.map((point, index) => {
+          const x = validData.length > 1 ? (index / (validData.length - 1)) * (width - 40) + 20 : width / 2;
           const y = height - 20 - ((point[yKey] - minY) / range) * (height - 40);
           return (
             <circle

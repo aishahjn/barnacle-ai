@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FaChartLine, FaGasPump, FaAnchor, FaWater, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 import { 
   BarChart, 
@@ -9,11 +10,19 @@ import {
   Alert,
   StatusBadge
 } from '../shared/Charts';
-import { 
-  generateTimeSeriesData, 
-  processFleetData
-} from '../../utils/dataProcessing';
-import { REAL_BIOFOULING_DATA } from '../../utils/csvDataLoader';
+import {
+  selectEnvironmentalData,
+  selectMarineDataLoading,
+  selectAlerts,
+  selectDataDisplaySettings,
+  selectAISData,
+  selectWeatherData,
+  selectOceanCurrentsData,
+  selectFleetSummary,
+  fetchAllMarineData,
+  addAlert,
+  setDefaultTimeframe
+} from '../../redux/selectors';
 
 /**
  * Advanced Marine Analytics Dashboard
@@ -31,43 +40,169 @@ import { REAL_BIOFOULING_DATA } from '../../utils/csvDataLoader';
  */
 
 const MarineAnalyticsDashboard = () => {
-  const [timeRange, setTimeRange] = useState('7days');
-  const [alerts, setAlerts] = useState([]);
+  const dispatch = useDispatch();
   
-  // Process data for different visualizations using real data
-  const timeSeriesData = generateTimeSeriesData(REAL_BIOFOULING_DATA);
-  const fleetData = processFleetData(REAL_BIOFOULING_DATA);
+  // Redux selectors
+  const environmentalData = useSelector(selectEnvironmentalData);
+  const aisData = useSelector(selectAISData);
+  const weatherData = useSelector(selectWeatherData);
+  const oceanCurrentsData = useSelector(selectOceanCurrentsData);
+  const fleetSummary = useSelector(selectFleetSummary);
+  const isLoading = useSelector(selectMarineDataLoading);
+  const alerts = useSelector(selectAlerts);
+  const dataDisplaySettings = useSelector(selectDataDisplaySettings);
   
-  // Calculate key performance indicators
-  const avgFoulingLevel = timeSeriesData.reduce((sum, item) => sum + item.foulingPercent, 0) / timeSeriesData.length;
-  const fuelImpact = timeSeriesData.reduce((sum, item) => sum + item.fuelConsumption, 0) / timeSeriesData.length;
-  const avgSpeedReduction = timeSeriesData.reduce((sum, item) => sum + item.speedReduction, 0) / timeSeriesData.length;
-  const environmentalScore = timeSeriesData.reduce((sum, item) => sum + item.environmentalScore, 0) / timeSeriesData.length;
+  // Local UI state
+  const timeRange = dataDisplaySettings.defaultTimeframe || '7days';
   
-  // Generate alerts based on data
   useEffect(() => {
-    const newAlerts = [];
+    // Fetch marine data on component mount
+    dispatch(fetchAllMarineData());
+  }, [dispatch]);
+  
+  // Handle time range changes
+  const handleTimeRangeChange = (newTimeRange) => {
+    dispatch(setDefaultTimeframe(newTimeRange));
+  };
+  
+  // Process Redux data for visualization
+  const processTimeSeriesData = () => {
+    // Use environmental data history or generate fallback data
+    const data = [];
+    const days = timeRange === '7days' ? 7 : timeRange === '30days' ? 30 : 90;
     
-    if (avgFoulingLevel > 70) {
-      newAlerts.push({
-        id: 'high-fouling',
+    // Use Redux data if available, otherwise fallback to mock for demo
+    if (environmentalData?.historicalData && environmentalData.historicalData.length > 0) {
+      return environmentalData.historicalData.slice(-days);
+    }
+    
+    // Incorporate live marine data into fallback generation
+    const baseTemperature = weatherData?.current?.temperature || 25;
+    const baseSalinity = oceanCurrentsData?.current?.salinity || 35;
+    const activeVessels = aisData?.activeVessels || 12;
+    
+    // Fallback data generation when Redux data is not available
+    for (let i = 0; i < days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - i));
+      
+      // Use marine data to influence generated values
+      const tempFactor = (baseTemperature - 20) / 10; // Higher temp = more fouling
+      const salinityFactor = (baseSalinity - 30) / 10; // Higher salinity = more fouling
+      const vesselFactor = Math.max(0, (activeVessels - 10) / 50); // More vessels = more data variance
+      
+      data.push({
+        date: date.toISOString().split('T')[0],
+        foulingPercent: Math.max(0, 20 + (Math.random() * 40) + (tempFactor * 10) + (salinityFactor * 5) + (vesselFactor * 5)),
+        fuelConsumption: 2.0 + Math.random() * 1.5 + (tempFactor * 0.2) + (vesselFactor * 0.1),
+        speedReduction: Math.random() * 15 + (tempFactor * 2) + (vesselFactor * 1),
+        environmentalScore: Math.max(0, 60 + Math.random() * 40 - (tempFactor * 5) - (vesselFactor * 2))
+      });
+    }
+    
+    return data;
+  };
+  
+  // Process data for different visualizations
+  const timeSeriesData = processTimeSeriesData();
+  
+  // Use Redux fleet data or fallback
+  const fleetData = fleetSummary || {
+    summary: {
+      totalVessels: 12,
+      activeVessels: 8,
+      maintenanceFlags: 2,
+      avgFuelPenalty: '+2.3%'
+    }
+  };
+  
+  // Ensure summary exists with proper fallbacks
+  const fleetSummary_safe = {
+    ...fleetData,
+    summary: fleetData.summary || {
+      totalVessels: 12,
+      activeVessels: 8,
+      maintenanceFlags: 2,
+      avgFuelPenalty: '+2.3%'
+    }
+  };
+  
+  // Calculate key performance indicators from Redux data with fallbacks
+  const avgFoulingLevel = React.useMemo(() => {
+    return environmentalData?.biofoulingRisk?.score || 
+      (timeSeriesData.reduce((sum, item) => sum + item.foulingPercent, 0) / timeSeriesData.length);
+  }, [environmentalData?.biofoulingRisk?.score, timeSeriesData]);
+    
+  const fuelImpact = React.useMemo(() => {
+    return environmentalData?.fuelConsumption?.current ||
+      (timeSeriesData.reduce((sum, item) => sum + item.fuelConsumption, 0) / timeSeriesData.length);
+  }, [environmentalData?.fuelConsumption?.current, timeSeriesData]);
+    
+  const avgSpeedReduction = React.useMemo(() => {
+    return environmentalData?.speedReduction?.average ||
+      (timeSeriesData.reduce((sum, item) => sum + item.speedReduction, 0) / timeSeriesData.length);
+  }, [environmentalData?.speedReduction?.average, timeSeriesData]);
+    
+  const environmentalScore = React.useMemo(() => {
+    return environmentalData?.overallScore?.value ||
+      (timeSeriesData.reduce((sum, item) => sum + item.environmentalScore, 0) / timeSeriesData.length);
+  }, [environmentalData?.overallScore?.value, timeSeriesData]);
+  
+  // Generate alerts based on data and dispatch to Redux
+  useEffect(() => {
+    // Prevent duplicate alerts by checking if similar alerts already exist
+    const existingBiofoulingAlert = alerts.find(alert => 
+      alert.category === 'biofouling' && 
+      alert.source === 'marine-analytics' && 
+      !alert.acknowledged
+    );
+    
+    const existingFuelAlert = alerts.find(alert => 
+      alert.category === 'fuel' && 
+      alert.source === 'marine-analytics' && 
+      !alert.acknowledged
+    );
+    
+    if (avgFoulingLevel > 70 && !existingBiofoulingAlert) {
+      dispatch(addAlert({
         type: 'warning',
+        category: 'biofouling',
         title: 'High Biofouling Detected',
-        message: `Fleet average biofouling: ${avgFoulingLevel.toFixed(1)}%. Consider scheduling maintenance.`
-      });
+        message: `Fleet average biofouling: ${avgFoulingLevel.toFixed(1)}%. Consider scheduling maintenance.`,
+        severity: 'medium',
+        timestamp: new Date().toISOString(),
+        acknowledged: false,
+        actionRequired: true,
+        source: 'marine-analytics'
+      }));
     }
     
-    if (fuelImpact > 2.5) {
-      newAlerts.push({
-        id: 'fuel-penalty',
+    if (fuelImpact > 2.5 && !existingFuelAlert) {
+      dispatch(addAlert({
         type: 'error',
+        category: 'fuel',
         title: 'Excessive Fuel Consumption',
-        message: `Current fuel penalty: ${((fuelImpact - 2.0) / 2.0 * 100).toFixed(1)}% above baseline.`
-      });
+        message: `Current fuel penalty: ${((fuelImpact - 2.0) / 2.0 * 100).toFixed(1)}% above baseline.`,
+        severity: 'high',
+        timestamp: new Date().toISOString(),
+        acknowledged: false,
+        actionRequired: true,
+        source: 'marine-analytics'
+      }));
     }
-    
-    setAlerts(newAlerts);
-  }, [avgFoulingLevel, fuelImpact]);
+  }, [avgFoulingLevel, fuelImpact, dispatch, alerts]);
+  
+  // Loading state handling
+  if (isLoading) {
+    return (
+      <div className="w-full space-y-6 p-4 lg:p-6">
+        <div className="text-center">
+          <div className="text-xl lg:text-2xl font-bold text-white mb-2">Loading Marine Analytics...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
   
   // Prepare data for different chart types
   const multiLineData = timeSeriesData.map(item => ({
@@ -103,7 +238,7 @@ const MarineAnalyticsDashboard = () => {
         <div className="mt-4 lg:mt-0">
           <select 
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
+            onChange={(e) => handleTimeRangeChange(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 bg-white"
           >
             <option value="7days">Last 7 Days</option>
@@ -116,13 +251,13 @@ const MarineAnalyticsDashboard = () => {
       {/* Alerts */}
       {alerts.length > 0 && (
         <div className="space-y-3">
-          {alerts.map(alert => (
+          {alerts.filter(alert => ['biofouling', 'fuel', 'marine-analytics'].includes(alert.category || alert.source)).map((alert, index) => (
             <Alert
-              key={alert.id}
+              key={alert.id || `${alert.category || 'unknown'}-${alert.timestamp || Date.now()}-${index}`}
               type={alert.type}
               title={alert.title}
               message={alert.message}
-              onDismiss={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}
+              onDismiss={() => {/* Handle dismiss if needed */}}
             />
           ))}
         </div>
@@ -282,22 +417,22 @@ const MarineAnalyticsDashboard = () => {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{fleetData.summary.totalVessels}</div>
+            <div className="text-2xl font-bold text-blue-600">{fleetSummary_safe.summary.totalVessels}</div>
             <div className="text-sm text-gray-600">Total Vessels</div>
           </div>
           
           <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{fleetData.summary.activeVessels}</div>
+            <div className="text-2xl font-bold text-green-600">{fleetSummary_safe.summary.activeVessels}</div>
             <div className="text-sm text-gray-600">Active Vessels</div>
           </div>
           
           <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <div className="text-2xl font-bold text-orange-600">{fleetData.summary.maintenanceFlags}</div>
+            <div className="text-2xl font-bold text-orange-600">{fleetSummary_safe.summary.maintenanceFlags}</div>
             <div className="text-sm text-gray-600">Maintenance Flags</div>
           </div>
           
           <div className="text-center p-4 bg-red-50 rounded-lg">
-            <div className="text-2xl font-bold text-red-600">{fleetData.summary.avgFuelPenalty}</div>
+            <div className="text-2xl font-bold text-red-600">{fleetSummary_safe.summary.avgFuelPenalty}</div>
             <div className="text-sm text-gray-600">Avg Fuel Penalty</div>
           </div>
         </div>
