@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash, FaGoogle, FaGithub, FaApple, FaExclamationTriangle }
 import { HiMail, HiLockClosed } from 'react-icons/hi';
 import { InlineLoading } from '../shared/Loading';
 import { selectLoginError, selectIsLoading } from '../../redux/Slices/userSlice';
-import { useMaritimeNotifications } from '../../hooks/useMaritimeNotifications';
+import { useCustomMaritimeNotifications } from '../../hooks/useCustomMaritimeNotifications';
 
 const LoginForm = ({ onToggleMode, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -19,8 +19,8 @@ const LoginForm = ({ onToggleMode, onSubmit }) => {
   const loginError = useSelector(selectLoginError);
   const isLoading = useSelector(selectIsLoading);
   
-  // Maritime notifications
-  const notifications = useMaritimeNotifications();
+  // Custom maritime notifications
+  const notifications = useCustomMaritimeNotifications();
 
   // Show error notification when login fails
   useEffect(() => {
@@ -43,7 +43,7 @@ const LoginForm = ({ onToggleMode, onSubmit }) => {
       try {
         notifications.system.dataProcessing('Authentication', 'processing');
         await onSubmit(formData);
-        notifications.user.actionCompleted('Login successful');
+        notifications.user.loginSuccess('Captain');
       } catch (error) {
         // Error handling is managed by Redux and useEffect
         console.error('Login failed:', error);

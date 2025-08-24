@@ -4,29 +4,14 @@ import './index.css'
 import App from './App.jsx'
 import { Provider } from 'react-redux'
 import store from './redux/store.js'
-import { SnackbarProvider } from 'notistack'
+import { MaritimeToastProvider } from './components/shared/MaritimeToast.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <SnackbarProvider 
-        maxSnack={3}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        autoHideDuration={4000}
-        preventDuplicate
-        dense
-        iconVariant={{
-          success: '⚓',
-          error: '🚨',
-          warning: '⚠️',
-          info: '🌊',
-        }}
-      >
+      <MaritimeToastProvider>
         <App />
-      </SnackbarProvider>
+      </MaritimeToastProvider>
     </Provider>
   </StrictMode>,
 )
