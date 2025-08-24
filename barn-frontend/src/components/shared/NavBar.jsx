@@ -1,36 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
 import { CgProfile } from 'react-icons/cg';
 import { FaSignOutAlt, FaUser } from 'react-icons/fa';
 import logo from '../../assets/logo.png';
 import { NAVIGATION_LINKS, LOGIN_BUTTON } from '../../constants/navigationConstants';
 import { DESIGN_TOKENS } from '../../constants/designTokens';
 import OptimizedImage from './OptimizedImage';
-import { 
-  logoutUser, 
-  selectIsAuthenticated, 
-  selectUser, 
-  selectUserName, 
-  selectUserInitials, 
-  selectUserRole,
-  selectIsLoading 
-} from '../../redux/Slices/userSlice';
+import { useAuth } from '../../contexts/AuthContext';
+import { getUserInitials, getUserDisplayName } from '../../utils/userUtils';
 
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
   
-  // Redux selectors for authentication state
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const user = useSelector(selectUser);
-  const userName = useSelector(selectUserName);
-  const userInitials = useSelector(selectUserInitials);
-  const userRole = useSelector(selectUserRole);
-  const isLoading = useSelector(selectIsLoading);
+  // Authentication context
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  
+  // User display information with improved extraction
+  const userName = getUserDisplayName(user);
+  const userInitials = getUserInitials(user);
+  const userRole = user?.role || 'Demo User';
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -53,12 +44,13 @@ const NavBar = () => {
 
   const handleLogout = async () => {
     try {
-      await dispatch(logoutUser()).unwrap();
+      await logout();
       setIsProfileMenuOpen(false);
       navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
       // Still navigate away on logout failure for UX
+      setIsProfileMenuOpen(false);
       navigate('/');
     }
   };
@@ -131,10 +123,10 @@ const NavBar = () => {
                 {/* User Info */}
                 <div className="flex flex-col text-left">
                   <span className="text-sm font-semibold text-gray-700 leading-tight">
-                    {userName || user?.email?.split('@')[0] || 'User'}
+                    {userName}
                   </span>
                   <span className="text-xs text-gray-500 leading-tight font-medium">
-                    {userRole || 'Member'}
+                    {userRole}
                   </span>
                 </div>
               </button>
