@@ -100,9 +100,21 @@ const alertsSlice = createSlice({
   initialState,
   reducers: {
     addAlert: (state, action) => {
-      const alert = { ...action.payload, id: Date.now().toString() };
-      state.alerts.unshift(alert);
-      if (!alert.acknowledged) state.unreadCount += 1;
+      const newAlert = action.payload;
+      
+      // Check if this alert already exists (prevent duplicates)
+      const existingAlert = state.alerts.find(alert => 
+        alert.title === newAlert.title && 
+        alert.message === newAlert.message &&
+        alert.category === newAlert.category
+      );
+      
+      // Only add if it doesn't already exist
+      if (!existingAlert) {
+        const alert = { ...newAlert, id: Date.now().toString() };
+        state.alerts.unshift(alert);
+        if (!alert.acknowledged) state.unreadCount += 1;
+      }
     },
     
     removeAlert: (state, action) => {
