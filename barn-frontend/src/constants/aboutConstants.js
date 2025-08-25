@@ -1,8 +1,18 @@
+import aishah from '../assets/aishah.png';
+import asyiqin from '../assets/asyiqin.png';
+import beldron from '../assets/beldron.png';
+import iyzman from '../assets/iyzman.png';
+import fernado from '../assets/fernado.png';
+
 // About constants for the application
 export const ABOUT_CONTENT = {
   title: 'About SeaWise',
+  mission: 'To provide a cutting-edge marine technology solution that leverages AI and big data to combat biofouling, reduce fuel consumption, and promote sustainable maritime operations.',
+  vision: 'To be the global leader in AI-driven marine technology, revolutionizing ship efficiency and environmental stewardship.',
+  description: 'SeaWise is a comprehensive platform designed to empower shipping companies with predictive analytics and actionable insights to manage and mitigate biofouling. By integrating advanced AI/ML algorithms with real-time marine data, our solution helps optimize vessel routes, schedule proactive maintenance, and significantly cut operational costs and carbon emissions.',
+  focus: 'SeaWise focuses on optimizing maritime operations through predictive biofouling management. Our platform uses advanced AI to analyze marine data, forecasting biofouling risk on ship hulls. This enables proactive maintenance scheduling, minimizing drag, and significantly reducing fuel consumption and CO2 emissions. Our technology promotes sustainable, cost-effective shipping by transforming raw data into actionable insights.',
   subtitle: 'ABOUT BARNACLEAN & SEAWISE',
-  mainHeading: 'Innovating Marine Technology for Sustainable Shipping',
+  mainHeading: 'Innovating Marine Technology for Sustainable Shipping'
 };
 
 // Service Information section - Updated with BarnaClean process
@@ -29,46 +39,51 @@ export const SERVICE_INFO = {
   ]
 };
 
-// Company Information section - Updated with BarnaClean focus
 export const COMPANY_INFO = {
-  title: 'About BarnaClean',
-  background: 'Developed by the SeaWise team for MarineHack2025 Challenge 1, BarnaClean is an AI-driven biofouling prevention system that revolutionizes maritime operations through intelligent barnacle management and route optimization.',
-  mission: 'To predict and prevent biofouling for 30% fuel savings while protecting our oceans through innovative AI technology that optimizes vessel performance and reduces environmental impact.',
-  vision: 'A world where every vessel hull can tell you when to clean, enabling smart routing systems that cut fuel costs, lower emissions, and protect marine ecosystems with optimized, eco-friendly routes.'
+  name: 'SeaWise',
+  tagline: 'Navigating Smarter, Sailing Greener.',
+  contact: {
+    email: 'contact@seawise.com',
+    phone: '+60 12-345 6789',
+    address: 'Universiti Malaysia Sabah, Kota Kinabalu'
+  },
+  social: {
+    linkedin: 'https://www.linkedin.com/company/seawise',
+    twitter: 'https://twitter.com/seawise'
+  }
 };
 
-// Team members data - Updated with actual SeaWise team from BarnaClean document
+// Team members data
 export const TEAM_MEMBERS = [
   {
     name: 'Nor Asyiqin Nazirah Binti Rapandi',
-    role: 'Pitcher & Product Presenter',
-    bio: 'Leads product presentation and business development initiatives for BarnaClean marine solutions.',
-    image: null, // Placeholder for future image integration
-    contact: '0128699358' // From document
+    role: 'Team Leader & Frontend Developer',
+    bio: 'Technical team leader with expertise in frontend development and project coordination for marine technology solutions.',
+    image: asyiqin
   },
   {
     name: 'Beldron Feadrek',
-    role: 'Team Leader & Frontend Developer',
-    bio: 'Technical team leader with expertise in frontend development and project coordination for marine technology solutions.',
-    image: null
+    role: 'Pitcher & Product Presenter',
+    bio: 'Leads product presentation and business development initiatives for BarnaClean marine solutions.',
+    image: beldron
   },
   {
     name: 'Fernando George Anak Mani',
     role: 'AI/ML Engineer',
     bio: 'Specialist in artificial intelligence and machine learning, developing innovative biofouling prediction algorithms and route optimization systems.',
-    image: null
+    image: fernado
   },
   {
-    name: 'Iyzman Daniel Bin Mijir',
+    name: 'Iyzman Daniel Bin Mijirun',
     role: 'Backend Developer / Full Stack Engineer',
     bio: 'Full-stack engineer focusing on robust Python (FastAPI) server development and AI engine integration for marine analytics.',
-    image: null
+    image: iyzman
   },
   {
-    name: 'Unsiti Nur Aishah Binti Juan',
+    name: 'Siti Nur Aishah Binti Juan',
     role: 'Big Data Analyst / Data Engineer',
     bio: 'Data engineering specialist managing AIS data, marine weather patterns, and oceanographic datasets for predictive analytics.',
-    image: null
+    image: aishah
   }
 ];
 

@@ -1,78 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { TEAM_MEMBERS } from '../../constants/aboutConstants';
-import { DESIGN_TOKENS } from '../../constants/designTokens';
-import { Fish, Seahorse, Starfish, Coral } from '../shared/MarineElement';
+import { ABOUT_CONTENT, COMPANY_INFO, TEAM_MEMBERS } from "../../constants/aboutConstants";
+import { FaLinkedin, FaTwitter, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 
 const CompanyInfoSection = () => {
   const [currentMemberIndex, setCurrentMemberIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const currentMember = TEAM_MEMBERS[currentMemberIndex];
 
-  // Auto-advance functionality
   useEffect(() => {
-    const interval = setInterval(() => {
-      handleNext();
-    }, 5000); // Auto-advance every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [currentMemberIndex]);
-
-  const handleNext = () => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentMemberIndex((prev) => (prev + 1) % TEAM_MEMBERS.length);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  const handlePrevious = () => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentMemberIndex((prev) => (prev - 1 + TEAM_MEMBERS.length) % TEAM_MEMBERS.length);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  const handleMemberSelect = (index) => {
-    if (index !== currentMemberIndex) {
+    const timer = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentMemberIndex(index);
+        setCurrentMemberIndex((prevIndex) => 
+          (prevIndex + 1) % TEAM_MEMBERS.length
+        );
         setIsTransitioning(false);
-      }, 150);
-    }
-  };
+      }, 500); // Duration of the fade-out effect
+    }, 5000); // Change team member every 5 seconds
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentMember = TEAM_MEMBERS[currentMemberIndex];
 
   return (
-    <section className="relative w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex flex-col justify-center items-center pt-32 pb-32">
-      {/* Background Decorations with Marine Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-64 h-64 bg-teal-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" />
-        <div className="absolute bottom-32 right-10 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style={{ animationDelay: '4s' }} />
-        
-        {/* Marine elements */}
-        <div className="absolute top-16 right-20">
-          <Fish size={100} opacity={0.12} animationSpeed={8} />
+    <section className="bg-white py-16 sm:py-24 text-gray-800">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-blue-900 mb-4">
+            {ABOUT_CONTENT.title}
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            {ABOUT_CONTENT.description}
+          </p>
         </div>
-        <div className="absolute bottom-20 left-20">
-          <Seahorse size={80} opacity={0.15} animationSpeed={6} />
+
+        {/* Core Sections */}
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-24 mb-16 items-center">
+          {/* Left Side - About Us */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-gray-900">Our Mission & Vision</h3>
+            <p className="text-gray-700 leading-relaxed">
+              <span className="font-semibold text-blue-600">Mission:</span> {ABOUT_CONTENT.mission}
+            </p>
+            <p className="text-gray-700 leading-relaxed">
+              <span className="font-semibold text-blue-600">Vision:</span> {ABOUT_CONTENT.vision}
+            </p>
+          </div>
+
+          {/* Right Side - Company Details */}
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
+            <ul className="space-y-4 text-gray-700">
+              <li className="flex items-start space-x-3">
+                <FaEnvelope className="flex-shrink-0 mt-1 h-5 w-5 text-blue-600" />
+                <span><a href={`mailto:${COMPANY_INFO.contact.email}`} className="hover:underline">{COMPANY_INFO.contact.email}</a></span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <FaPhone className="flex-shrink-0 mt-1 h-5 w-5 text-blue-600" />
+                <span>{COMPANY_INFO.contact.phone}</span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <FaMapMarkerAlt className="flex-shrink-0 mt-1 h-5 w-5 text-blue-600" />
+                <span>{COMPANY_INFO.contact.address}</span>
+              </li>
+            </ul>
+            <div className="flex space-x-4">
+              <a href={COMPANY_INFO.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                <FaLinkedin className="h-6 w-6" />
+              </a>
+              <a href={COMPANY_INFO.social.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-600 transition-colors duration-200">
+                <FaTwitter className="h-6 w-6" />
+              </a>
+            </div>
+          </div>
         </div>
-        <div className="absolute top-1/3 left-16">
-          <Starfish size={60} opacity={0.18} animationSpeed={7} />
-        </div>
-        <div className="absolute bottom-1/3 right-16">
-          <Coral size={70} opacity={0.14} animationSpeed={5} />
-        </div>
-      </div>
-      
-      <div className="relative z-10 max-w-7xl w-full mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Side - Professional Photo */}
-          <div className="relative">
-            {/* Modern card design for photo */}
-            <div className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden">
-              {/* Background gradient on hover */}
+
+        <hr className="my-16 border-gray-200" />
+
+        {/* Team Section */}
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-24 items-center">
+          {/* Left Side - Team Member Photo */}
+          <div className="w-full flex justify-center order-2 md:order-1">
+            <div className="relative w-full max-w-sm rounded-xl shadow-2xl p-4 bg-white group transition-transform duration-500 hover:scale-105">
               <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
               
               {/* Photo container */}
@@ -80,85 +89,57 @@ const CompanyInfoSection = () => {
                 <div className={`text-center transition-all duration-500 ease-in-out transform ${
                   isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                 }`}>
-                  <div className="w-32 h-32 bg-gradient-to-br from-teal-200 to-blue-200 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-                    <div className="text-gray-700 text-2xl font-bold">
-                      {currentMember.name.split(' ').map(n => n[0]).join('')}
+                  {currentMember.image ? (
+                    <img
+                      src={currentMember.image}
+                      alt={'portrait of ' + currentMember.name}
+                      className="w-full h-full object-cover rounded-xl shadow-md"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 bg-gradient-to-br from-teal-200 to-blue-200 rounded-full mx-auto flex items-center justify-center shadow-lg">
+                      <div className="text-gray-700 text-2xl font-bold">
+                        {currentMember.name.split(' ').map(n => n[0]).join('')}
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-gray-500 text-sm font-medium">Professional Photo</p>
+                  )}
+
                 </div>
               </div>
+              <p className="text-gray-500 text-sm font-medium mt-4 text-center">Team Member of <em>SeaWise</em></p>
             </div>
           </div>
 
           {/* Right Side - Team Member Info */}
-          <div className="space-y-8">
-            {/* Header Section */}
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center px-4 py-2 bg-teal-50 text-teal-600 rounded-full text-sm font-semibold mb-6">
-                <span className="w-2 h-2 bg-teal-600 rounded-full mr-2 animate-pulse" />
-                MEET OUR TEAM
-              </div>
-            </div>
-
-            {/* Team Member Name */}
-            <h1 className={`text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight text-center lg:text-left transition-all duration-500 ease-in-out transform ${
-              isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-            }`}>
-              {currentMember.name}
-            </h1>
-
-            {/* Role */}
-            <p className={`text-xl lg:text-2xl text-teal-600 font-semibold text-center lg:text-left transition-all duration-500 ease-in-out transform ${
-              isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-            }`}>
-              {currentMember.role}
-            </p>
-
-            {/* Member Bio */}
-            <div className="pt-4">
-              <p className={`text-gray-700 text-lg leading-relaxed text-center lg:text-left transition-all duration-500 ease-in-out transform ${
-                isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-              }`}>
+          <div className="space-y-8 order-1 md:order-2">
+            <h3 className="text-2xl font-bold text-gray-900">Meet Our Team</h3>
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold text-blue-600">
+                {currentMember.name}
+              </h4>
+              <p className="text-md font-semibold text-gray-700">
+                {currentMember.role}
+              </p>
+              <p className="text-gray-600 leading-relaxed">
                 {currentMember.bio}
               </p>
             </div>
-
-            {/* Navigation */}
-            <div className="flex items-center justify-center lg:justify-start space-x-4 pt-8">
-              {/* Previous Button */}
-              <button
-                onClick={handlePrevious}
-                className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
-                aria-label="Previous team member"
-              >
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-
-              {/* Next Button */}
-              <button
-                onClick={handleNext}
-                className="w-16 h-16 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                aria-label="Next team member"
-              >
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Team Member Indicators */}
-            <div className="flex justify-center lg:justify-start space-x-2 pt-4">
+            
+            {/* Navigation Dots */}
+            <div className="flex justify-center md:justify-start space-x-2 mt-4">
               {TEAM_MEMBERS.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => handleMemberSelect(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 ${
-                    index === currentMemberIndex ? 'bg-teal-500 scale-110 shadow-md' : 'bg-gray-300 hover:bg-gray-400'
+                  onClick={() => {
+                    setIsTransitioning(true);
+                    setTimeout(() => {
+                      setCurrentMemberIndex(index);
+                      setIsTransitioning(false);
+                    }, 500);
+                  }}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentMemberIndex ? 'bg-blue-600 scale-125' : 'bg-gray-300 hover:bg-gray-400'
                   }`}
-                  aria-label={`View team member ${index + 1}`}
+                  aria-label={`Show team member ${index + 1}`}
                 />
               ))}
             </div>
