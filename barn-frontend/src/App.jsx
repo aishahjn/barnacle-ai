@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Home, Login, SignUp, Statistics, Model, About, NotFound } from './pages'
+import { Home, Login, SignUp, Statistics, Model, About, Profile, NotFound } from './pages' 
 import Pricing from './pages/Pricing';
 import Demo from './pages/Demo';
 import NavBar from './components/shared/NavBar';
@@ -69,6 +69,16 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Statistics />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Add the Profile route here - also protected since it's a user's profile */}
+          <Route 
+            path='/profile' 
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } 
           />
